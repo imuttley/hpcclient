@@ -1,2 +1,2 @@
-# hpcclient
-python module for hpc middleware for cloud services
+#hpcclient
+*Python module for hpc middleware for cloud services*
