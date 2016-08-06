@@ -9,12 +9,7 @@ if not 'marconierr' in globals(): marconierr=Queue()
 
 DB=os.environ['dbhost']
 
-#if os.environ['agentname']=="Kuka":
-    #"/Users/muttley/marconi/."
-#    POSTSERVER="http://192.107.94.227:5984"
-#    WORKDIR="{0}/marconi/.".format(os.environ.get("HOME"))
-#else:
-    # TODO: postserver with public authenticated access
+# TODO: postserver with public authenticated access
 POSTSERVER="http://{0}:5984".format(DB)
 WORKDIR="{0}/middleware-tn/.".format(os.environ.get("WORK"))
 
