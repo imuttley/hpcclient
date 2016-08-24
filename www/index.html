@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+
+<script >
+</script>
+<link/>
+
+<title>Login page</title>
+</head>
+<body>
+
+<div class="header">
+
+</div>
+
+<div class="cantainer">
+<!-- to do with fingerprint app -->
+<!-- get index.html, 
+	generate rsa private/public key,
+	generate qrcode with public key, auth portal,
+   scan with iphone app, 
+   sign with fingerprint and send authentication to couchdb.
+   Public key, until new session, will be authenticated,
+   push access granted and redirect to portalselect.html with publickey in header  -->
+   
+<form action="getauth.html">
+	<p class="loginname">
+		Name:<input type="text" name="name">
+	</p>
+	<p class="loginpasswd">
+		Passwd:<input type="password" name="password">
+	</p>
+	<!--  <keygen name="key" keytype="rsa"> -->
+	<p class="loginsubmit">
+		<input type="submit">
+	</p>
+</form>
+</div>
+
+
+<div class="footer">
+</div>
+
+</body>
+</html>

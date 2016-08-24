@@ -1,0 +1,312 @@
+body{
+	background-color:#6f6a6a;
+	height: 800px;
+	width: 1200px;
+	transition: all 1s;
+	-webkit-transition: all 1s;
+}
+iframe{
+	position: fixed;
+	top:1%;
+	opacity:1.0;
+	transition: all 2s;
+}
+.cineca{
+	background-image:url('../images/bg4.jpg');
+	background-size:cover;
+	background-attachment:fixed;
+	/*background-color:#aaa;*/
+	
+}
+.nsg{
+	background-image:url('../images/bg1.jpg');
+	background-size:cover;
+	background-attachment:fixed;
+	/*background-color:littlegrey;*/
+	
+}
+b{
+	color:#888;
+}
+.panel{
+	height: 100%;
+	width: 80%;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: 100%;	 
+	background-attachment:fixed;
+	text-align:center;
+	border-radius:14px;
+	transition: all 15s;
+	-webkit-transition: all 15s;
+	
+}
+.panel:hover{
+	background-size: 100%;
+}
+.panel.active{
+	margin-top: 20%;
+}
+.border{
+	height:50px;
+	background-color:#6f6a6a;
+	
+}
+.checkbox{
+	background-image:url('../images/ok.jpg');
+	background-size:80%;
+	background-repeat:no-repeat;
+	background-position:-80px 50%;
+	background-color:white;
+	border-radius:100%;
+	width:80px;
+	height:80px;
+	text-align:center;
+	line-height:80px;
+	transition: background-position 300ms,background-color 500ms, transform 100ms;
+	-webkit-transition: background-position 300ms,background-color 500ms, -webkit-transform 100ms;
+	
+}
+.checkbox:hover{
+	transform: scale(1.2);
+	-webkit-transform: scale(1.2);
+}
+.checkbox.active{
+	background-position:50% 50%;
+}
+.form{
+	background-color:white;
+	border-radius:0%;
+	position:fixed;
+	top: 50%;
+	right: 0%;
+	width:80px;
+	height:80px;
+	text-align:center;
+	line-height:2%;
+	transition: background 500ms, transform 100ms;
+	-webkit-transition: background 500ms, -webkit-transform 100ms;
+	
+}
+.form:hover{
+	
+	transform: scale(1.2);
+	-webkit-transform: scale(1.2);
+}
+.submit{
+	/*background-image:url('../images/bg2.jpg');*/
+	background-size:cover;
+	background-repeat:no-repeat;
+	background-position:center;
+	background-color:#ddd;
+	position:fixed;
+	padding:1.4em 4px 4px 4px;
+	bottom:-200px;
+	width:80%;
+	height:100px;
+	border-radius:5px;
+	text-align:right;
+	line-height:0.01em;
+	transition: all 500ms;
+	-webkit-trasition: all 500ms;
+}
+#marconi.submit{
+	left:10%;
+}
+#fermi.submit{
+	opacity:0.0;
+}
+.submit.active{
+	bottom:1%;
+}
+.submit input{
+	height: 20px;
+	width: 170px;
+	font-size:12pt;
+	outline:none;
+	border:none;
+	border-radius:2px;
+	border-bottom:2px solid #ccc;	
+}
+.submit label{
+	
+	position:relative;
+	color:red;
+	font-size:8pt;
+	top:-2.1em;
+	left:-16em;
+	opacity:0.5;
+	transition: all 500ms;
+	-webkit-trasition: all 500ms;
+}
+.submit label.active {
+	font-size:8pt;
+	top:-2.1em;
+	left:-16em;
+	color:green;
+}
+
+
+.description{
+	background-color:#6f6a6a;
+	border-radius:10px;
+	width:70%;
+	text-align:justify;
+	line-height:30px;
+	margin-top:1%;
+	margin-left:3%;
+	
+}
+
+.rightpos{
+	background-image:url('../images/ok.jpg');
+	background-size:80%;
+	background-repeat:no-repeat;
+	background-position:-80px 50%;
+	background-color:white;
+	border-radius:100%;
+	position:relative;
+	width:80px;
+	height:80px;
+	text-align:center;
+	line-height:80px;
+	box-shadow: 0 20px 15px -10px hsla(0,0%,0%,.25);
+	transform:rotateZ(180deg);
+	-webkit-transform:rotateZ(180deg);	
+	transition: background-position 300ms,background-color 500ms, transform 100ms;
+	-webkit-transition: background-position 300ms,background-color 500ms, -webkit-transform 100ms;
+}
+.rightpos:hover{
+	transform: rotateZ(180deg) scale(1.2);
+	-webkit-transform: rotateZ(180deg) scale(1.2);
+}
+.rightpos.active{
+	background-position:50% 50%;
+}
+.leftpos{
+	background-image:url('../images/ok.jpg');
+	background-size:80%;
+	background-repeat:no-repeat;
+	background-position:-80px 50%;
+	background-color:white;
+	border-radius:100%;
+	position:relative;
+	float:right;
+	top:-80px;
+	width:80px;
+	height:80px;
+	text-align:center;
+	line-height:80px;
+	box-shadow: 0 20px 15px -10px hsla(0,0%,0%,.25);
+	transition: background-position 300ms,background-color 500ms, transform 100ms;
+	-webkit-transition: background-position 300ms,background-color 500ms, -webkit-transform 100ms;
+}
+.leftpos:hover{
+	transform: scale(1.2);
+	-webkit-transform: scale(1.2);
+}
+.leftpos.active{
+	background-position:50% 50%;
+}
+
+.trigger{
+	position:fixed;
+	bottom:5%;
+	left:-100px;
+	width:200px;
+	height:80px;
+}
+
+.dpanel{
+	float: none;
+    height: 300px;
+    margin: 1.5em;
+    width: 400px;
+    position:fixed;
+    top:-10%;
+    
+    background-repeat: no-repeat;
+	background-position: center;
+	background-size: cover;	 
+	background-attachment:fixed;
+	text-align:justify;
+    
+    transform:perspective(500);
+    transform-style: preserver-3d;
+    transition: .3s;
+    z-index:-1;
+    -webkit-transform: perspective(500);
+    -webkit-transform-style: preserve-3d;
+    -webkit-transition: .3s;
+}
+.dpanel.left{
+	left: 32%;
+}
+.dpanel.leftb{
+	left: 64%;
+}
+.dpanel.mid{
+	top:36%;
+}
+.dpanel.up {
+	transform: perspective(500) rotateX(90deg) translateY(-200px) translateZ(100px);
+    -webkit-transform: perspective(500) rotateX(90deg) translateY(-200px) translateZ(100px);
+    z-index:99;
+}
+.dpanel.ddown {
+	transform: perspective(500) rotateX(-0deg) translateY(0px) translateZ(0px);
+    -webkit-transform: perspective(500) rotateX(-0deg) translateY(0px) translateZ(0px);
+    z-index:99;
+}
+
+.ddescription {
+	
+	height:250px;
+	width:350px;
+    background-color: #222;
+    color: #fff;
+    padding: 1.5em;
+    border-radius: 0px 0px 10px 10px;
+    
+    transform: rotateX(-90deg);
+    transform-origin: 100% 0;
+    transition: .2s;
+    
+    -webkit-transform: rotateX(-90deg);
+    -webkit-transform-origin: 100% 0;
+    -webkit-transition: .2s;
+}
+.ddescription:hover{
+	/*height:350px;*/
+	/*width:400px;*/
+}
+.ndescription {
+	
+	height:200px;
+	
+	background-color: #555;
+    color: #fff;
+    padding: 1.5em;
+    border-radius: 10px 10px 10px 10px;
+    
+    transform-origin: 100% 0;
+    transition: .5s;
+    
+    -webkit-transform-origin: 100% 0;
+    -webkit-transition: .5s;
+}
+.dpanel.up > .ddescription  {
+    box-shadow: 0 20px 15px -10px hsla(0,0%,0%,.25);
+}
+.dpanel.up > .ndescription  {
+	box-shadow: 0 20px 15px -10px hsla(0,0%,0%,.25);
+}
+.dpanel.down > .ddescription  {
+	box-shadow: 0 20px 15px -10px hsla(0,0%,0%,.25);
+}
+.dpanel.down > .ndescription  {
+    box-shadow: 0 20px 15px -10px hsla(0,0%,0%,.25);
+}
+.transparent{
+	opacity:0.0;
+}
