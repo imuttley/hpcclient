@@ -1,5 +1,5 @@
 #hpcclient
-*Python module for hpc middleware for cloud services*
+*a Notebook module for hpc middleware with cloud services extension*
 ----------------
 **python system/user module dependencies**
 > *agents*
