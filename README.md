@@ -20,6 +20,7 @@
 
 > *module*
 >
+- threading
 - requests
 - time
 - pyuv 
