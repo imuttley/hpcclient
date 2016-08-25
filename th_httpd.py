@@ -16,7 +16,7 @@ from traitlets import Unicode
 
 #define("port",default=9123,help="hpcclient webinterface",type=int)
 
-params={'fileinputid':'loadfile','objname':__name__.split('.')[1],'guiid':'hpcclientwebui','width':900,'height':900,'port':9123,'srcdoc':'','page':'fermi.html'}
+params={'destfolder':'webfolder','fileinputid':'loadfile','objname':__name__.split('.')[1],'guiid':'hpcclientwebui','width':900,'height':900,'port':9123,'srcdoc':'','page':'fermi.html'}
 
 openfiles=dict()
 
@@ -68,7 +68,8 @@ class test():
 		javaobj=self.js(vt)
 		self.display.display_javascript(javaobj)
 
-class th_m(threading.Thread):
+"""packet message hpcchannel to iframe"""
+class th_hpcchannel(threading.Thread):
 	from IPython.core.display import Javascript as js
 	from IPython.core.display import display_javascript as dj 
 	import time
@@ -91,9 +92,12 @@ class th_m(threading.Thread):
 			msg=session.send(self.kernel.iopub_socket,session.msg("hpcclient",content={"data":"{0}".format(self.msg)}))
 			self.time.sleep(10)
 
+#def proxymessage(msg):
+	
+"""packet message hpcchannel from iframe"""
 def runjob(arg):
 	ker=get_ipython().kernel
-	th=th_m(arg,kernel=ker)
+	th=th_hpcchannel(arg,kernel=ker)
     	#th.daemon=True
 	th.start()
 
@@ -102,7 +106,7 @@ def write2file(filename,chunck=''):
 	""" write filename to localhost, with base64 data decode """
 	if not chunck:
 		data=base64.b64decode(openfiles.pop(filename).split(',')[1])
-		with open(filename,'w') as f:
+		with open('{0}/{1}'.format(params['destfolder'],filename),'w') as f:
 			f.write(data)
 	else:
 		if filename in openfiles:
@@ -216,18 +220,17 @@ console.log(ifr);
 var newifr=(!ifr);
 
 /* if none present, create it */
-if(newifr) ifr=document.createElement('iframe');
-
-/* set all attribute for iframe */
-ifr.setAttribute('id','{guiid}');
-ifr.setAttribute('width',{width});
-ifr.setAttribute('height',{height});
-ifr.setAttribute('sandbox','allow-top-navigation allow-scripts allow-forms allow-same-origin');
-ifr.setAttribute('seamless','true');
-//ifr.src='http://localhost:{port}/{page}';
-ifr.src='{srcdoc:s}';
-console.log(ifr);
-
+if(newifr){{
+	ifr=document.createElement('iframe');
+	/* set all attribute for iframe */
+	ifr.setAttribute('id','{guiid}');
+	ifr.setAttribute('width',{width});
+	ifr.setAttribute('height',{height});
+	ifr.setAttribute('sandbox','allow-top-navigation allow-scripts allow-forms allow-same-origin');
+	ifr.setAttribute('seamless','true');
+	//ifr.src='http://localhost:{port}/{page}';
+	ifr.src='{srcdoc:s}';
+}}
 /* get first output cell */
 var el=element.get(0);
 
@@ -239,11 +242,16 @@ if (newifr){{
 	fi.setAttribute('onchange','window.fload(this)');
 	fi.setAttribute('multiple','true');
 	fi.setAttribute('size','20');
+	
 	var fs=document.createElement('p');
-	fs.setAttribute('id','filesize');
+	fs.setAttribute('id','filespercent');
+	
+	//var sty=document.createElement('style');
+	//sty.textContent="#filesize > h1{{transition: all 1s ease;-webkit-transition:all 1s ease;opacity:1;}}";
 	el.appendChild(ifr);
-	el.appendChild(fs);
+	//document.body.appendChild(sty);
 	el.appendChild(fi);
+	el.appendChild(fs);
 }}
 /* or generate a message and TODO: #hpcclientwebui reference */
 else el.innerHTML='<h1 style="color:red;">web gui already showed</h1>';
@@ -258,15 +266,28 @@ window.postbroadcast=function(ms){{
 window.sendchunck=function(name,totalsize,data){{
 	var ker=IPython.notebook.kernel;
 	var chuncksize=1024*4;
+	var filed=document.getElementById(name);
 	console.log('data len:',data.length);
-	var obj=document.getElementById('filesize');
-	obj.innerHTML='<h1>'+String(Math.floor((1-data.length/totalsize)*100))+'</h1>';
+	var obj=document.getElementById('filespercent');
+	//obj.innerHTML='<h1 id="'+name+'">'+name+' '+String(Math.floor((1-data.length/totalsize)*100))+'&#37;</h1>';
+	//var h=obj.childNodes[0];
+	//h.style.opacity=0;
 	var cmd="{objname}.write2file('"+name+"',chunck='";
 	if (data.length>0){{
 		var subdata=data.slice(chuncksize);
 		//console.log('subdata len:',subdata.length);
 		var cb={{shell:{{reply:function(sh){{if(sh.content.status=='ok')window.sendchunck(name,totalsize,subdata);}}}},
 			iopub:{{output:function(out){{console.log('stdout from write2file:',out);}}}}}};
+		
+        	if (!filed){{
+                	filed=document.createElement('h1');
+                	filed.setAttribute('id',name);
+                	obj.appendChild(filed);
+		}}
+		filed.innerHTML=''+name+' '+String(Math.floor((1-data.length/totalsize)*100))+'&#37;';
+        }}
+	else {{
+		if(filed) filed.remove();	
 	}}
 	cmd+=data.slice(0,chuncksize)+"')";
 	var nb=IPython.notebook;
