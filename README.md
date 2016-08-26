@@ -2,8 +2,25 @@
 *a Notebook module for hpc middleware with cloud services extension*
 ----------------
 **python system/user module dependencies**
-> *agents*
-> 
+> **module**
+> modular extension for the ipython interface, that embed an enhanced widget for ui
+>
+- sshtunnel
+- threading
+- requests
+- time
+- pyuv 
+- HTMLParser
+- base64
+- hashlib
+- xattr
+
+
+------------------
+> **agents**
+> agent is a standalone process for host with sh like cli 
+> python 2.7 modules needed
+>
 - pyuv
 - xattr
 - hashlib
@@ -16,18 +33,5 @@
 - time
 - subprocess
 - sys
->
-
-> *module*
->
-- threading
-- requests
-- time
-- pyuv 
-- HTMLParser
-- base64
-- hashlib
-- xattr
->
 
 
