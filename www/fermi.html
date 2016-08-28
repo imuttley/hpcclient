@@ -6,7 +6,7 @@
 
 <script src="lib/mimic.js"></script>
 <script src="lib/TweenMax.min.js"></script>
-<!-- <script src="lib/pouchdb-5.3.2.js"></script> -->
+<script src="lib/pouchdb-5.3.2.js"></script> 
 
 <script src="lib/tudor.js"></script> 
 
@@ -123,7 +123,8 @@ window.onload=function(){
 		inputs[inp].onkeyup=inputchange;
 	}
 	
-	document.getElementById('nsglogin').submit();
+	// for debug remove nsg gateway login
+	//document.getElementById('nsglogin').submit();
 	var iframe=document.getElementById('nsgframe');
 	// set src to index portal after authentication submitted
 	iframe.onload=function(){
@@ -131,7 +132,7 @@ window.onload=function(){
 		//	iframe.src="https://nsgdev.sdsc.edu:8443/portal2/home.action";	
 		//load.innerText="Ok";
 	}
-	
+	tudorevents();	
 };
 
 </script>
@@ -189,8 +190,8 @@ window.onload=function(){
 		Redirect to NSG portal for HPC computation
 	</div>
 	<div class="ddescription">
-		<h1>Files</h1>
-		<div id="folder">
+		<small>Files</small>
+		<divt style="height:90%;width:100%;font-size:8px" id="folder">
 		File on cloud ...
 		</div>
 	</div>
@@ -200,12 +201,9 @@ window.onload=function(){
 		Redirect to NSG portal for HPC computation
 	</div>
 	<div class="ddescription">
-		<h1>File editor</h1>
-		<div id="editor">
-		div div div div
-		div div div div
-		div div div divdiv div div div div div div div
-		</div>
+		<small>Editor</small>
+		<textarea style="height:90%;width:100%;font-size:8px" id="editor">
+		</textarea>
 	</div>
 </div>
 <div class="dpanel mid leftb" >

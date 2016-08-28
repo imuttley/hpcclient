@@ -3,9 +3,7 @@
 #from tornado import web
 #from tornado.httpserver import HTTPServer
 from HTMLParser import HTMLParser
-from urllib import base64
-import mimetypes
-import threading
+import base64,mimetypes,threading,os
 
 #for widget
 import ipywidgets as wdg
@@ -16,7 +14,7 @@ from traitlets import Unicode
 
 #define("port",default=9123,help="hpcclient webinterface",type=int)
 
-params={'destfolder':'webfolder','fileinputid':'loadfile','objname':__name__.split('.')[1],'guiid':'hpcclientwebui','width':900,'height':900,'port':9123,'srcdoc':'','page':'fermi.html'}
+params={'window':0,'destfolder':'webfolder','fileinputid':'loadfile','objname':__name__.split('.')[1],'guiid':'hpcclientwebui','width':1080,'height':900,'port':9123,'srcdoc':'','page':'fermi.html'}
 
 openfiles=dict()
 
@@ -75,7 +73,7 @@ class th_hpcchannel(threading.Thread):
 	import time
 	
 	def __init__(self,msg,kernel=None):
-		super(th_m,self).__init__()
+		super(th_hpcchannel,self).__init__()
 		self.msg=msg
 		self.kernel=kernel
         	self.name='javascriptthread'
@@ -89,23 +87,47 @@ class th_hpcchannel(threading.Thread):
 			#self.dj(self.js(var))
 			session=self.kernel.session
 			
-			msg=session.send(self.kernel.iopub_socket,session.msg("hpcclient",content={"data":"{0}".format(self.msg)}))
+			msend=session.send(self.kernel.iopub_socket,session.msg("hpcclient",content={"data":"{0}".format(self.msg)}))
 			self.time.sleep(10)
 
 #def proxymessage(msg):
-	
+"""send message to channel hpcclient"""
+def sendmsg(sender,msg,raw=False):
+	kernel=get_ipython().kernel
+	session=kernel.session
+	if not raw:
+        	msend=session.send(kernel.iopub_socket,session.msg("hpcclient",content={"response":sender,"data":"{0}".format(msg)}))
+	else:
+		msend=session.send(kernel.iopub_socket,session.msg("hpcclient",content={"response":sender,"data":msg}))
+
 """packet message hpcchannel from iframe"""
 def runjob(arg):
 	ker=get_ipython().kernel
 	th=th_hpcchannel(arg,kernel=ker)
     	#th.daemon=True
 	th.start()
+"""get a block of selected file"""
+def fileselect(name,offset=0,size=4*1024):
+	with open('{0}/{1}'.format(params['destfolder'],name),'r') as f:
+		f.seek(offset)
+		block=f.read(size)
+        sendmsg("fileselect",{"name":name,"offset":offset,"blocksize":size,"block":block},raw=True)
+"""write a block on selected file and offset"""
+def writeblock(name,offset=0,data=''):
+	with open('{0}/{1}'.format(params['destfolder'],name),'r+') as f:
+		f.seek(offset)
+		f.write(data)
 
-
+"""dir"""
+def filelist():
+	resp=os.listdir(params['destfolder'])
+	sendmsg("filelist",resp) 
+"""unblocking file transfer"""	
 def write2file(filename,chunck=''):
 	""" write filename to localhost, with base64 data decode """
 	if not chunck:
 		data=base64.b64decode(openfiles.pop(filename).split(',')[1])
+		#data=base64.b64decode(openfiles.pop(filename))
 		with open('{0}/{1}'.format(params['destfolder'],filename),'w') as f:
 			f.write(data)
 	else:
@@ -211,7 +233,19 @@ def _repr_javascript_():
 
 
 	js="""
+/* get first output cell */
+var el=element.get(0);
+var targetwindow=null;
 
+/* prevent cache from output cell */
+if (!IPython.notebook.kernel) {{
+	console.log('reload module {objname}');
+	while (el.hasChildNodes()) el.removeChild(el.firstChild);
+	el.innerHTML='<h1 style="color:red;">reload {objname} for show gui</h1>';	
+}} else {{
+if ({window}){{
+	targetwindow=window.open('{srcdoc:s}','{guiid}','width={width},height={height},menubar=no,location=no,resizable=no,scrollbars=yes,status=no');
+}} 
 /* search an iframe for render */
 var ifr=document.getElementById('{guiid}');
 console.log(ifr);
@@ -231,8 +265,6 @@ if(newifr){{
 	//ifr.src='http://localhost:{port}/{page}';
 	ifr.src='{srcdoc:s}';
 }}
-/* get first output cell */
-var el=element.get(0);
 
 /* append iframe and fileinput as child */
 if (newifr){{
@@ -248,7 +280,7 @@ if (newifr){{
 	
 	//var sty=document.createElement('style');
 	//sty.textContent="#filesize > h1{{transition: all 1s ease;-webkit-transition:all 1s ease;opacity:1;}}";
-	el.appendChild(ifr);
+	if (!{window}) el.appendChild(ifr);
 	//document.body.appendChild(sty);
 	el.appendChild(fi);
 	el.appendChild(fs);
@@ -256,12 +288,23 @@ if (newifr){{
 /* or generate a message and TODO: #hpcclientwebui reference */
 else el.innerHTML='<h1 style="color:red;">web gui already showed</h1>';
 
-/* function for message broadcasts to iframes */
-window.postbroadcast=function(ms){{
-	var fr=window.frames;
-	for (var i=0;i<fr.length;i++){{
-		fr[i].postMessage(ms,'*');
+/* function for send message to iframes or window */
+window.communicate=function(ms){{
+	if ({window}){{
+		targetwindow.postMessage({{content:{{data:'setorigin'}}}},'*');
+		targetwindow.postMessage(ms,'*');
 	}}
+	else {{
+		var fr=window.frames;
+		for (var i=0;i<fr.length;i++) {{
+			fr[i].postMessage({{content:{{data:'setorigin'}}}},'*');
+			fr[i].postMessage(ms,'*');
+		}}
+	}}
+}};
+window.setorigin=function(){{
+	var msg={{content:{{data:'setorigin'}}}};
+	window.communicate(msg);
 }};
 window.sendchunck=function(name,totalsize,data){{
 	var ker=IPython.notebook.kernel;
@@ -306,15 +349,16 @@ window.fload=function(obj){{
 					fr.totalsize=obj.files[i].size;
 					fr.onload=function(e){{
 						console.log('send file to backend');
-						window.sendchunck(e.target.filename,e.target.result.length,e.target.result);
+						var data=e.target.result;
+						window.sendchunck(e.target.filename,data.length,data);
 						//var cmd="base64datafile='"+part+"'";
 						//window.myexec(cmd);
 						//var cmd="{objname}.writefile('"+this.filename+"','"+e.target.result+"')";
 						//window.myexec(cmd);	
-						}}
+						}};
 					fr.onerror=function(e){{
 						console.log('something wrong: ',e);
-					}}
+					}};
 					fr.readAsDataURL(obj.files[i]);
 				}}
 			}}
@@ -324,7 +368,7 @@ window.fload=function(obj){{
 window.myregister=function(){{
 	var ker=IPython.notebook.kernel
 	if (ker!=null)
-        	ker.register_iopub_handler('hpcclient',postbroadcast,ker);
+        	ker.register_iopub_handler('hpcclient',communicate,ker);
 	else{{
 		console.log('retry to register msg_type');
 		setTimeout(myregister,2000);
@@ -339,9 +383,16 @@ window.myexec=function(cmd){{
         var cellcb=nextcell.get_callbacks();
         kernel.execute(cmd,cellcb,{{silent:false}});
 }};
+window.arraytostr=function(ab){{
+	var uint=new Uint8Array(ab);
+	var data='';
+	for (var i=0;i<uint.length;i++) data+=String.fromCharCode(uint[i]);
+   	return data;
+}};
 /* channel gateway for remote host and iframe */
 if (1){{
-	var cb={{shell:{{reply:window.postbroadcast}},iopub:{{output:window.postbroadcast}}}};
+	var cb={{shell:{{reply:window.communicate}},iopub:{{output:window.communicate}}}};
+
 	window.myregister(); 
 	window.onmessage=function(e){{
 		if (e.origin){{
@@ -350,13 +401,36 @@ if (1){{
         			//var nb=IPython.notebook;
 				//var kernel=nb.kernel;
 				/* sandbox method execution */	
+				
 				var cmd='{objname}.';
-				if (e.data.method)
-        				cmd+=e.data.method+'(';
-				if (e.data.params)
-					cmd+='"'+e.data.params+'"';
-				cmd+=')';
-				window.myexec(cmd);
+				switch (e.data.method){{
+					case 'write2file':
+						var name=e.data.params.name;
+						var data=window.arraytostr(e.data.params.data);
+						window.sendchunck(name,data.length,data);
+						break;
+					case 'script':
+						var data=(e.data.params.data);
+						eval(data);
+						break;
+					case 'targetwindow':
+						targetwindow=e.source;
+						window.setorigin();	
+						break;
+					default:	
+        					cmd+=e.data.method+'(';
+						if (e.data.params){{
+							var prm=Object.values(e.data.params);
+							while(prm.length){{
+								var val=prm.shift();
+								if (typeof(val)==='string') cmd+='"'+val+'"';
+								else cmd+=val;
+								if (prm.length) cmd+=',';
+							}}
+						}}
+						cmd+=')';
+						window.myexec(cmd);
+				}}
 				//var nextcell=nb.get_selected_cell();
 				//var code=nextcell.toJSON();
 				//code.source=cmd;
@@ -370,6 +444,7 @@ if (1){{
 			}}
         	}}
 	}};
+}}
 }}
 """.format(**params)
 
@@ -405,10 +480,11 @@ if (1){{
     
     /* function for message broadcasts to iframes */
     window.postbroadcast=function(ms){{
-        var fr=window.frames;
-        for (var i=0;i<fr.length;i++){{
-        fr[i].postMessage(ms,'*');
-        }}
+        if (!{window}){{
+		var fr=window.frames;
+        	for (var i=0;i<fr.length;i++){{
+        		fr[i].postMessage(ms,'*');
+        	}}
     }}
     /* channel gateway for remote host and iframe */
     if (1){{
