@@ -139,7 +139,7 @@ window.onload=function(){
 <style type="text/css">
 
 </style>
-<title>fermi</title>
+<title>Marconi node gui</title>
 </head>
 <body>
 <!-- wheel selector -->
@@ -155,7 +155,13 @@ window.onload=function(){
 	</div>
 	<div class="ddescription">
 		<small>Queue</small>
-		<textarea style="height:90%;width:100%;font-size:8px;" id="queue">Here a form to select a job id, and a method for get qstat information.</textarea>
+		<div style="height:90%;width:100%;font-size:12px;" id="queue">Here a form to select a job id, and a method for get qstat information.
+			<div class="spinner">
+  				<div class="bounce1"></div>
+  				<div class="bounce2"></div>
+  				<div class="bounce3"></div>
+			</div>
+		</div>
 	</div>
 	
 	
@@ -167,7 +173,7 @@ window.onload=function(){
 	</div>
 	<div class="ddescription">
 		<small>Stats</small>
-		<textarea style="height:90%;width:100%;font-size:8px" id="stat">View stats for selected job.</textarea> 
+		<textarea style="height:90%;width:100%;font-size:12px" id="stat">View stats for selected job.</textarea> 
 	</div>	
 </div>
 
@@ -191,8 +197,12 @@ window.onload=function(){
 	</div>
 	<div class="ddescription">
 		<small>Files</small>
-		<divt style="height:90%;width:100%;font-size:8px" id="folder">
-		File on cloud ...
+		<div style="width:100%" id="folder">
+		 	<div class="spinner">
+  				<div class="bounce1"></div>
+  				<div class="bounce2"></div>
+  				<div class="bounce3"></div>
+			</div>	
 		</div>
 	</div>
 </div>
@@ -202,7 +212,7 @@ window.onload=function(){
 	</div>
 	<div class="ddescription">
 		<small>Editor</small>
-		<textarea style="height:90%;width:100%;font-size:8px" id="editor">
+		<textarea style="height:90%;width:100%;font-size:18px" id="editor">
 		</textarea>
 	</div>
 </div>
@@ -296,8 +306,8 @@ window.onload=function(){
 	</form>
 </div>
 <form id="nsglogin" target="frame" method="post" name="loginBox" action="https://nsgdev.sdsc.edu:8443/portal2/login.action">
-		<input type="hidden" name="username" value="">
-		<input type="hidden" name="currentPassword" value="">
+		<input type="hidden" name="username" value="tommaso.nicosia">
+		<input type="hidden" name="currentPassword" value="francesca2006">
 		<input type="hidden" name="method:login" value="Login">
  </form>
  

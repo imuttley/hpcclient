@@ -3,21 +3,23 @@
 #from tornado import web
 #from tornado.httpserver import HTTPServer
 from HTMLParser import HTMLParser
-import base64,mimetypes,threading,os
+import uuid,requests,xattr,base64,mimetypes,threading,os
+from sshtunnel import SSHTunnelForwarder as tunnel
 
 #for widget
-import ipywidgets as wdg
-from traitlets import Unicode
+#import ipywidgets as wdg
+#from traitlets import Unicode
 
 #import os
 #from IPython.display import IFrame 
 
 #define("port",default=9123,help="hpcclient webinterface",type=int)
 
-params={'window':0,'destfolder':'webfolder','fileinputid':'loadfile','objname':__name__.split('.')[1],'guiid':'hpcclientwebui','width':1080,'height':900,'port':9123,'srcdoc':'','page':'fermi.html'}
-
+"""object variables"""
+params={'sessionid':-1,'window':0,'destfolder':'webfolder','fileinputid':'loadfile','objname':__name__.split('.')[1],'guiid':'hpcclientwebui','width':1080,'height':900,'port':9123,'srcdoc':'','page':'fermi.html'}
 openfiles=dict()
-
+sharefiles=[]
+eventslistener=[]
 
 #try:
 #	with open('moduletest/www/compiled.html','rb') as html:
@@ -90,6 +92,51 @@ class th_hpcchannel(threading.Thread):
 			msend=session.send(self.kernel.iopub_socket,session.msg("hpcclient",content={"data":"{0}".format(self.msg)}))
 			self.time.sleep(10)
 
+
+"""thread for listen events from message server, parameters: server, db, include_docs, docid, since"""
+class th_eventlistener(threading.Thread):
+    import requests,time
+
+    def __init__(self,id,kernel=None,**params):
+        super(th_eventlistener,self).__init__()
+        self.params=params
+	self.name=id
+	self.kernel=kernel	
+    
+    def reply(self,msg,raw=False):
+	session=self.kernel.session
+        msend=session.send(self.kernel.iopub_socket,session.msg("hpcclient",content={"response":self.name,"data":msg}))
+ 
+    def proxyevent(self,resp,*arg,**kwarg):
+	if not resp._content_consumed:	
+		for line in resp.iter_lines():
+			try:
+              			if (len(line)>1):
+					jsonresp=eval(line.replace("null","None").replace("true","True").replace("false","False"))
+					self.reply(jsonresp,raw=True)
+            		except Exception as e:
+                		self.reply(e)
+            		#finally:
+				#print 'event from {0}:{1}'.format(self.params['server'],message)
+				#self.reply(message)
+                        	#msend=session.send(self.kernel.iopub_socket,session.msg("hpcclient",content={"data":msg}))
+				#sendmsg(self.id,message,raw=True)
+                		#js="""window.postMessage({response},'*');""".format(**obj)
+                		#Javascript(data=js)
+
+
+    def run(self):
+        url="{server}/{db}/_changes?feed=continuous&include_docs={include_docs}&id={docid}&since={since}".format(**self.params)
+        print 'listen to:{0}'.format(url)
+	try:
+                self.requests.get(url,stream=False,hooks=dict(response=self.proxyevent))
+        except Exception as e:
+                print 'exception {0}'.format(e)
+		self.time.sleep(10)
+                self.run()
+
+
+
 #def proxymessage(msg):
 """send message to channel hpcclient"""
 def sendmsg(sender,msg,raw=False):
@@ -121,7 +168,8 @@ def writeblock(name,offset=0,data=''):
 """dir"""
 def filelist():
 	resp=os.listdir(params['destfolder'])
-	sendmsg("filelist",resp) 
+	checked=[ k for k in resp if 'user.share' in xattr.listxattr('{0}/{1}'.format(params['destfolder'],k))]
+	sendmsg("filelist",{"dir":resp,"checked":checked},raw=True) 
 """unblocking file transfer"""	
 def write2file(filename,chunck=''):
 	""" write filename to localhost, with base64 data decode """
@@ -137,7 +185,34 @@ def write2file(filename,chunck=''):
 			openfiles.update({filename:chunck})
 		
 		
+def sharedlist(*list):
+	sharefiles=[ f for f in list ]
+	allfiles=os.listdir(params['destfolder'])
+	unsharefile=[ file for file in allfiles if file not in list]
+	for file in unsharefile:
+		try:
+			test=xattr.removexattr('{0}/{1}'.format(params['destfolder'],file),'user.share')
+		except:
+			pass
+	for file in sharefiles:
+		try:
+			test=xattr.setxattr('{0}/{1}'.format(params['destfolder'],file),'user.share','true')
+		except:
+			pass
+
+""" create a thread for listen and share msg """		
+def eventproxy(obj):
+	#id=uuid.uuid1().get_hex()	
+	obj.update({'kernel':get_ipython().kernel})
+	#obj.update({'id':id})
+	if obj['id'] not in [ ev.name for ev in eventslistener]: 
+		th=th_eventlistener(**obj)
+		eventslistener.append(th)
+		th.start()
+	sendmsg("eventproxy",obj['id'])
 	
+def sendevent(id,msg):
+	sendmsg("event",{"listenerid":id,"msg":msg})
 
 #class myfilehandler(web.StaticFileHandler):
 #    def prepare(self):
@@ -221,7 +296,7 @@ class myhtmlparse(HTMLParser):
 #	return """<iframe id="hpcclientwebui" src="http://localhost:9123/fermi.html" width="800px" height="900px"></iframe>"""
 
 	
-
+""" javascript for widget """
 def _repr_javascript_():
 
 	path='{0}/www'.format(__name__.split('.')[0])
@@ -233,9 +308,11 @@ def _repr_javascript_():
 
 
 	js="""
+/* javascript for enhanced widget */
 /* get first output cell */
 var el=element.get(0);
 var targetwindow=null;
+var couchsessionid={sessionid};
 
 /* prevent cache from output cell */
 if (!IPython.notebook.kernel) {{
@@ -245,6 +322,7 @@ if (!IPython.notebook.kernel) {{
 }} else {{
 if ({window}){{
 	targetwindow=window.open('{srcdoc:s}','{guiid}','width={width},height={height},menubar=no,location=no,resizable=no,scrollbars=yes,status=no');
+		
 }} 
 /* search an iframe for render */
 var ifr=document.getElementById('{guiid}');
@@ -389,11 +467,17 @@ window.arraytostr=function(ab){{
 	for (var i=0;i<uint.length;i++) data+=String.fromCharCode(uint[i]);
    	return data;
 }};
+window.hb=function(){{
+	var msg={{content:{{data:'heartbeat'}}}};
+	window.communicate(msg);
+	setTimeout(hb,10000);
+}};
 /* channel gateway for remote host and iframe */
 if (1){{
 	var cb={{shell:{{reply:window.communicate}},iopub:{{output:window.communicate}}}};
 
-	window.myregister(); 
+	window.myregister();
+	window.hb(); 
 	window.onmessage=function(e){{
 		if (e.origin){{
 			if (window.location.origin!=e.origin){{
@@ -417,10 +501,21 @@ if (1){{
 						targetwindow=e.source;
 						window.setorigin();	
 						break;
+					case 'eventproxy':
+						cmd+=e.data.method+'('+JSON.stringify(e.data.params)+')';
+						window.myexec(cmd);
+						break;		
 					default:	
         					cmd+=e.data.method+'(';
 						if (e.data.params){{
-							var prm=Object.values(e.data.params);
+							var prm=[];
+							var obj=e.data.params;
+							// Object.values experimental!!
+							if (!obj.hasOwnProperty('forEach')){{
+								var keys=Object.keys(obj);
+								keys.forEach(function(key){{prm.push(obj[key]);}});
+							}}else	
+						 		obj.forEach(function(value){{prm.push(value);}});
 							while(prm.length){{
 								var val=prm.shift();
 								if (typeof(val)==='string') cmd+='"'+val+'"';
