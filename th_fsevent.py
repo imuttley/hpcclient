@@ -1,4 +1,5 @@
 """ fs event listener for new/change file to syncronize, delete TODO """
+from config import *
 
 # from host --> db
 class th_fsevent(threading.Thread):

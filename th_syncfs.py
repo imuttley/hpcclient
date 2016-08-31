@@ -1,10 +1,13 @@
 """ object for listen db _attachments change """
+from config import *
 
 # from db to host
 class th_syncfilesystem(threading.Thread):
     import pyuv,requests,time
     def __init__(self,id,sessionid):
         super(th_syncfilesystem,self).__init__()
+    	self.id=id
+	self.sessionid=sessionid
     def getfilename(self,r,*arg,**kwarg):
 	    for line in r.iter_lines():
             	if len(line)>2:
@@ -19,7 +22,7 @@ class th_syncfilesystem(threading.Thread):
 				#	getattach(filename)
 				#transfer file and set attr user.author
                 	except Exception as e:
-                    		if DEBUG:print e
+                    		if DEBUG:print "exception from method getfilename {0}: {1}".fomart(self.id,e)
                     		pass
 		#else:
 		#	print "heartbeat"
@@ -37,4 +40,20 @@ class th_syncfilesystem(threading.Thread):
         except Exception as e:
             self.time.sleep(10)
             self.run()
+
+def getattach(files,folder,stats):
+    if DEBUG:print "folder {0}/".format(folder)
+    lockvar.acquire()
+    while not statsqueue.empty():
+        statsqueue.get()
+    statsqueue.put(stats)
+    lockvar.release()
+    if True:print "stats: {0}".format(stats)
+    for filename in files:
+        attrib=files[filename]
+        if DEBUG:print "{0} {1} size: {2}".format(filename,attrib['digest'].replace("md5-","md5: "),attrib['length'])
+        ttg=th_getattach(filename,folder,stats[filename],attrib)
+        getattachs.append(ttg)
+        ttg.start()
+
 

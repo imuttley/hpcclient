@@ -1,10 +1,11 @@
 """ thread object for listen db events """
+from config import *
 
 # output post channel
-class th_get(threading.Thread):
+class th_dbeventlisten(threading.Thread):
     import requests,time
     def __init__(self,id,sessionid,db,q):
-        super(th_get,self).__init__()
+        super(th_dbeventlisten,self).__init__()
 	self.session=sessionid
 	self.db=db
 	self.queue=q
@@ -13,10 +14,9 @@ class th_get(threading.Thread):
 	    try:
 		if (len(line)>1):
                 	jsonresp=eval(line)
-                	#NO-LOCK-WAIT
 			self.queue.put(jsonresp['doc']['post'].replace("\n",""),False)
             except Exception as e:
-                #print e
+                if DEBUG: print "excetion from call chunck {0}: {1}".format(self.name,e)
 		pass
     def run(self):
         handle="_changes"
@@ -29,6 +29,7 @@ class th_get(threading.Thread):
         try:
             self.requests.get(url,stream=False,hooks=dict(response=self.chunck))
         except Exception as e:
+	    if DEBUG: print "excetion from run {0}: {1}".format(self.name,e)
             self.time.sleep(10)
             self.run()
 # TODO empty queue response for new command event

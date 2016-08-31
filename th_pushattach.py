@@ -1,8 +1,9 @@
 """ push file from file system to _attachment in db """
+from config import *
 
 # filesystem syncs thread
 class th_pushattach(threading.Thread):
-    import couchdb,os,requests,base64,mimetypes
+    import os,requests,base64,mimetypes
     from hashlib import md5
     import xattr
     def __init__(self,folder):
@@ -26,7 +27,7 @@ class th_pushattach(threading.Thread):
                 dsturl=POSTSERVER+"/folders/"+self.folder
                 if DEBUG: print "{0}->{1}".format(srcfile,dsturl)
                 sync=False
-                self.filestat={self.filename:{"author":ME,"comment":"created from 192.107.94.227","mtime":"now"}}
+                self.filestat={self.filename:{"author":ME,"comment":"created from xxxxxxx","mtime":"now"}}
                 try:
                     req=self.requests.get(dsturl)
                     jsoncontent=eval(req.content.replace("true","True").replace("false","False"))
