@@ -124,7 +124,7 @@ window.onload=function(){
 	}
 	
 	// for debug remove nsg gateway login
-	//document.getElementById('nsglogin').submit();
+	document.getElementById('nsglogin').submit();
 	var iframe=document.getElementById('nsgframe');
 	// set src to index portal after authentication submitted
 	iframe.onload=function(){
@@ -306,8 +306,8 @@ window.onload=function(){
 	</form>
 </div>
 <form id="nsglogin" target="frame" method="post" name="loginBox" action="https://nsgdev.sdsc.edu:8443/portal2/login.action">
-		<input type="hidden" name="username" value="tommaso.nicosia">
-		<input type="hidden" name="currentPassword" value="francesca2006">
+		<input type="hidden" name="username" value="">
+		<input type="hidden" name="currentPassword" value="">
 		<input type="hidden" name="method:login" value="Login">
  </form>
  
