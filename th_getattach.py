@@ -1,4 +1,6 @@
 """ object for download _attachment from db and write to filesystem """
+from config import *
+import threading
 
 class th_getattach(threading.Thread):
     import os,requests,base64

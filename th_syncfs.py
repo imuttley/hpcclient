@@ -1,5 +1,6 @@
 """ object for listen db _attachments change """
 from config import *
+from th_getattch import *
 
 # from db to host
 class th_syncfilesystem(threading.Thread):
@@ -48,7 +49,7 @@ def getattach(files,folder,stats):
         statsqueue.get()
     statsqueue.put(stats)
     lockvar.release()
-    if True:print "stats: {0}".format(stats)
+    if DEBUG:print "stats: {0}".format(stats)
     for filename in files:
         attrib=files[filename]
         if DEBUG:print "{0} {1} size: {2}".format(filename,attrib['digest'].replace("md5-","md5: "),attrib['length'])
