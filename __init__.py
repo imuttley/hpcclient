@@ -10,17 +10,19 @@ if __name__=='__main__':
 from config import *
 from Queue import Queue
 import os,xmlrpclib,threading
-imoprt sshtunnel as tunnel
+from sshtunnel import SSHTunnelForwarder as tunnel
 
 
-if agentname not "Kuka":
+
+
+#if agentname not "Kuka":
     #"/Users/muttley/fermi/."
     #POSTSERVER="http://192.107.94.227:5984"
-    WORKDIR="{0}/fermi/.".format(os.environ.get("HOME"))
-else:
+#    WORKDIR="{0}/fermi/.".format(os.environ.get("HOME"))
+#else:
     # TODO: postserver with public authenticated access
     #POSTSERVER="http://localhost:5984"
-    WORKDIR="{0}/middleware-tn/.".format(os.environ.get("WORK"))
+#    WORKDIR="{0}/middleware-tn/.".format(os.environ.get("WORK"))
 
 from th_dbevent import *
 from th_fsevent import *
@@ -29,9 +31,8 @@ from th_syncfs import *
 from . import th_view as marconiview
 
 """TODO: ask for username and password"""
-def starttunnel():
-        server=tunnel(('login.marconi.cineca.it',22),ssh_pkey=('$HOME/.ssh/id_rsa'),ssh_username='tnicosia',local_bind_address=('localhost',9999),remote_bind_address=('r000u17l01',5984))
-        server.start()
+def definetunnel():
+        return tunnel(('login.marconi.cineca.it',22),ssh_pkey=('.myid/id_rsa'),ssh_username='tnicosia',local_bind_address=('localhost',9999),remote_bind_address=('r000u17l01',5984))
 
 def printfilequeue():
     for ind in range(excludequeue.qsize()):
@@ -48,19 +49,37 @@ def hpcclientlog(event,filename,evnt,error):
     else:
         if DEBUG:print "{0} {1}".format(filename,evnt)
 
+class execute():
+	def __init__(self,function,arg):
+		self._function=function
+		self._arg=arg
+	@property
+	def result(self):
+		try:
+			self._function(self._arg)
+			return True
+		except:
+			return False
+
+
+
+threads=['tunnelconnect','hpcout','hpcerr','getparams','th_out','th_err','hpcrpc','th_fs','th_watch','th_push']
+#result=[k for k in initseq if initseq.k]
+
+
 #start tunnel
 if not 'tunnelconnect' in globals(): 
-	tunnelconnect=starttunnel()
+	tunnelconnect=definetunnel()
 	tunnelconnect.start()
 
 #define queue for message
 if not 'hpcout' in globals(): hpcout=Queue()
 if not 'hpcerr' in globals(): hpcerr=Queue()
-if not 'agentname' in globals(): raise Exception('Agent name not set')
+#if not 'agentname' in globals(): raise Exception('Agent name not set')
 
 
 # input channel
-if not 'fermirpc' in globals(): fermirpc=xmlrpclib.ServerProxy(COMMANDPOSTURL)
+if not 'hpcrpc' in globals(): hpcrpc=xmlrpclib.ServerProxy(COMMANDPOSTURL)
 if not 'th_out' in globals():
 	th_out=th_dbeventlisten('marconistdout_thread',HPCSESSIONID,'stdout',hpcout)
 	th_out.daemon=True
