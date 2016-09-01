@@ -5,7 +5,8 @@ from config import *
 class th_pushattach(threading.Thread):
     import os,requests,base64,mimetypes
     from hashlib import md5
-    import xattr
+    import myxattr as xattr
+
     def __init__(self,folder):
         super(th_pushattach,self).__init__()
         #self.filename=filename

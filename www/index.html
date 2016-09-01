@@ -3,13 +3,47 @@
 <head>
 <meta charset="UTF-8">
 
-<script >
+<script>
+var mainwindow=null;
+var msgfunction={};
+
+
+function sendmsg(req,obj){
+        if (mainwindow){
+                document.body.classList.remove('idle');
+                mainwindow.postMessage({method:req,params:obj},'*');
+        }else{
+                document.body.classList.add('idle');
+                console.log('mainwindow not defined');
+        }
+}
+
+function verifypasswd(el){
+	var user=document.getElementById('user');
+	var passwd=document.getElementById('passwd');
+	if (mainwindow)
+		sendmsg('verifypasswd',{user:user.value,passwd:passwd.value});
+}
+
+window.onmessage=function(e){
+	if (window.location.origin!=e.origin){
+		var response=e.data.content.response;
+		if (msgfunction.hasOwnProperty(response)){
+			(msgfunction[response].onmessage)(msgfunction[response].elemid,e.data.content.data);
+		}else{
+			mainwindow=e.source;
+			console.log('message from external iframe:',e.data.content);
+			var but=document.getElementById('loginbutton');
+			but.style.opacity=1;
+		}
+	}
+};
 </script>
 <link/>
 
 <title>Login page</title>
 </head>
-<body>
+<body >
 
 <div class="header">
 
@@ -25,18 +59,18 @@
    Public key, until new session, will be authenticated,
    push access granted and redirect to portalselect.html with publickey in header  -->
    
-<form action="getauth.html">
+<!--<form action="">-->
 	<p class="loginname">
-		Name:<input type="text" name="name">
+		Name:<input type='text' id='user' name='name'>
 	</p>
 	<p class="loginpasswd">
-		Passwd:<input type="password" name="password">
+		Passwd:<input type='password' id='passwd' name='password'>
 	</p>
 	<!--  <keygen name="key" keytype="rsa"> -->
 	<p class="loginsubmit">
-		<input type="submit">
+		<button style='opacity:0' id='loginbutton' onclick='verifypasswd(this)' type='button'>login</button>
 	</p>
-</form>
+<!--</form>-->
 </div>
 
 

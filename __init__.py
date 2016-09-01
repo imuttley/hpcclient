@@ -41,13 +41,12 @@ def printfilequeue():
         excludequeue.put(file)
 
 
-
-
 def hpcclientlog(event,filename,evnt,error):
     if error is not None:
         if DEBUG:print "error: {0}".format(error)
     else:
         if DEBUG:print "{0} {1}".format(filename,evnt)
+
 
 class execute():
 	def __init__(self,function,arg):

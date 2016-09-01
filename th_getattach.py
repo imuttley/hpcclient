@@ -5,7 +5,8 @@ import threading
 class th_getattach(threading.Thread):
     import os,requests,base64
     from hashlib import md5
-    import xattr
+    import myxattr as xattr
+
     def __init__(self,filename,folder,stat,attrib):
         super(th_getattach,self).__init__()
         self.filename=filename

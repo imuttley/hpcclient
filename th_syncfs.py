@@ -1,6 +1,6 @@
 """ object for listen db _attachments change """
 from config import *
-from th_getattch import *
+from th_getattach import *
 
 # from db to host
 class th_syncfilesystem(threading.Thread):
@@ -10,7 +10,8 @@ class th_syncfilesystem(threading.Thread):
     	self.id=id
 	self.sessionid=sessionid
     def getfilename(self,r,*arg,**kwarg):
-	    for line in r.iter_lines():
+	[msgid for msgid in msgintf if msgintf[msgid]('getfilename')]
+	for line in r.iter_lines():
             	if len(line)>2:
                 	try:
                     		tr=line.replace("true","True").replace("false","False")

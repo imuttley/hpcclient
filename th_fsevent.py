@@ -4,13 +4,15 @@ from config import *
 # from host --> db
 class th_fsevent(threading.Thread):
     import pyuv,os
-    
+    import myxattr as xattr
+ 
     def __init__(self):
         super(th_fsevent,self).__init__()
         # filestate dict: { filename(string):[events..](array)}
         self.filestate={}
     def fsprocess(self,event,filename,evnt,error):
-        if error is not None:
+        [msgid for msgid in msgintf if msgintf[msgid]('fsprocess')]
+	if error is not None:
             if DEBUG:print "error: {0}".format(error)
             pass
         file=WORKDIR.replace("/.","/")+"webfolder/"+filename

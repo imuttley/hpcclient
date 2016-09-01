@@ -52,6 +52,8 @@ function showfile(id,datamsg){
 	var el=document.getElementById(id);
 	el.textContent=datamsg['block'];
 	el.filename=datamsg['name'];
+	el.blockoffset=datamsg['offset'];
+	el.blocksize=datamsg['blocksize'];
 }
 function fileelement(filename,el){
 	var inp=document.createElement('input');
@@ -245,15 +247,20 @@ function oldgetfile(e){
 	}
 }
 function editorfunc(e){
-	if ((e.code=='ArrowDown')||(e.code=='ArrowUp')){
-		console.log('editor text area blocksize:',e.target.textLength);	
-		console.log('editor cursor position:',e.target.selectionEnd);
+	var off=e.target.blockoffset;
+	if (e.code=='ArrowDown')
+		off+=e.target.blocksize;
+	if (e.code=='ArrowUp'){
+		off-=e.target.blocksize;
+		if (off<0) off=0;
 	}
-
+	getblock(e.target.filename,off);
+	console.log('editor text area blocksize:',e.target.textLength);	
+	console.log('editor cursor position:',e.target.selectionEnd);
 }
 function getdir(){
 	sendmsg('filelist',null);
-	setTimeout(getdir,3000);
+	setTimeout(getdir,13000);
 }
 function countdown(){
 	livetime-=10;

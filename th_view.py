@@ -1,17 +1,19 @@
 """View controller for widget"""
-
 from config import *
-
 from HTMLParser import HTMLParser
-import uuid,requests,xattr,base64,mimetypes,threading,os
+import uuid,requests,base64,mimetypes,threading,os
+import myxattr as xattr 
 from sshtunnel import SSHTunnelForwarder as tunnel
-from IPython.core.display import Javascript
 
-params={'sessionid':-1,'window':0,'destfolder':'webfolder','fileinputid':'loadfile','objname':__name__.split('.')[1],'guiid':'hpcclientwebui','width':1080,'height':900,'port':9123,'srcdoc':'','page':'fermi.html'}
+params={'logindone':0,'pageloaded':0,'sessionid':-1,'window':0,'destfolder':'webfolder','fileinputid':'loadfile','objname':__name__.split('.')[1],'guiid':'hpcclientwebui','width':1080,'height':900,'port':9123,'srcdoc':'','page':'fermi.html'}
 openfiles=dict()
 sharefiles=[]
 eventslistener=[]
 
+def fsevent(evnt):
+        filelist()
+#register event listener for filesystem
+msgintf.update({'fsevent':fsevent})
 
 """thread for listen events from message server, parameters: server, db, include_docs, docid, since"""
 class th_eventlistener(threading.Thread):
@@ -73,7 +75,7 @@ def starttunnel():
 
 """send message to channel hpcclient"""
 def sendmsg(sender,msg,raw=False):
-	kernel=get_ipython().kernel
+	#kernel=get_ipython().kernel
 	session=kernel.session
 	if not raw:
         	msend=session.send(kernel.iopub_socket,session.msg("hpcclient",content={"response":sender,"data":"{0}".format(msg)}))
@@ -82,7 +84,9 @@ def sendmsg(sender,msg,raw=False):
 
 """runjob procedure message from iframe"""
 def runjob(arg):
-	print "todo"
+	url='{0}?{1}'.format(RUNJOBPOSTURL,arg)
+	reqid=requests.post(url)		
+	if RJDEBUG: print 'runjob response:{0}'.format(reqid)
 
 """get a block of selected file"""
 def fileselect(name,offset=0,size=4*1024):
@@ -116,6 +120,7 @@ def filelist():
         resp=os.listdir(params['destfolder'])
         checked=[ k for k in resp if 'user.share' in xattr.listxattr('{0}/{1}'.format(params['destfolder'],k))]
         sendmsg("filelist",{"dir":resp,"checked":checked},raw=True)
+
 """set/clear file shared attribute."""		
 def sharedlist(*list):
 	sharefiles=[ f for f in list ]
@@ -177,23 +182,36 @@ class myhtmlparse(HTMLParser):
 	#		fw.write(self.compiledhtml)
 
 
+"""procedure for login"""
+def verifypasswd(user=None,passwd=None):
+	if DEBUG: print 'login for {0}, passwd {1}'.format(user,passwd)
+	#TODO: verify an hash
+	if ((user=='test') and (passwd=='test')):
+		params['logindone']=1
+		_render('fermi.html')
 
+"""http method for widget"""
+def _httpget(page):
+	""" www tree from $HOME/modulename/www/ """
+	path='{0}/www'.format(__name__.split('.')[0])
+        filepath='{0}/{1}'.format(path,page)
+        if DEBUG: print "parse html from: ".format(filepath)
+        compiler=myhtmlparse(path)
+        with open(filepath,'r') as root:
+                compiler.feed(root.read())	
+	params['srcdoc']="data:{0};base64,{1}".format(mimetypes.guess_type(filepath)[0],base64.b64encode(compiler.compiledhtml))
 
-
+def _render(page):
+	_httpget(page)
+	sendmsg("render",params['srcdoc'])
 	
 """ javascript for widget """
 def _repr_javascript_():
-	""" www tree from $HOME/modulename/www/ """
-	path='{0}/www'.format(__name__.split('.')[0])
-	filepath='{0}/{1}'.format(path,params['page'])
-	if DEBUG: print "parse html from: ".format(filepath)
-	compiler=myhtmlparse(path)
-	with open(filepath,'r') as root:
-		compiler.feed(root.read())
-	params['srcdoc']="data:{0};base64,{1}".format(mimetypes.guess_type(filepath)[0],base64.b64encode(compiler.compiledhtml))
-
+	if params['logindone']==0:
+		_httpget('index.html')
 
 	js="""
+if (true){{
 /* javascript for enhanced widget */
 /* get first output cell */
 var el=element.get(0);
@@ -207,7 +225,10 @@ if (!IPython.notebook.kernel) {{
 	el.innerHTML='<h1 style="color:red;">reload {objname} for show gui</h1>';	
 }} else {{
 if ({window}){{
-	targetwindow=window.open('{srcdoc:s}','{guiid}','width={width},height={height},menubar=no,location=no,resizable=no,scrollbars=yes,status=no');
+	if (window.hasloaded)
+		targetwindow=window.open(window.hasloaded,'{guiid}','width={width},height={height},menubar=no,location=no,resizable=no,scrollbars=yes,status=no');
+	else
+		targetwindow=window.open('{srcdoc:s}','{guiid}','width={width},height={height},menubar=no,location=no,resizable=no,scrollbars=yes,status=no');
 		
 }} 
 /* search an iframe for render */
@@ -227,7 +248,10 @@ if(newifr){{
 	ifr.setAttribute('sandbox','allow-top-navigation allow-scripts allow-forms allow-same-origin');
 	ifr.setAttribute('seamless','true');
 	//ifr.src='http://localhost:{port}/{page}';
-	ifr.src='{srcdoc:s}';
+	if (window.hasloaded)
+		ifr.src=window.hasloaded;
+	else
+		ifr.src='{srcdoc:s}';
 }}
 
 /* append iframe and fileinput as child */
@@ -254,16 +278,32 @@ else el.innerHTML='<h1 style="color:red;">web gui already showed</h1>';
 
 /* function for send message to iframes or window */
 window.communicate=function(ms){{
-	if ({window}){{
-		targetwindow.postMessage({{content:{{data:'setorigin'}}}},'*');
-		targetwindow.postMessage(ms,'*');
-	}}
-	else {{
-		var fr=window.frames;
-		for (var i=0;i<fr.length;i++) {{
-			fr[i].postMessage({{content:{{data:'setorigin'}}}},'*');
-			fr[i].postMessage(ms,'*');
-		}}
+        console.log('msg from notebook ');
+	var a='render';
+        switch (ms.content.response){{
+        	case 'render':
+			window.hasloaded=ms.content.data;
+       			if({window}){{
+				targetwindow.close();
+				targetwindow=window.open(window.hasloaded,'{guiid}','width={width},height={height},menubar=no,location=no,resizable=no,scrollbars=yes,status=no');
+			}}
+			else {{
+				var ifr=document.getElementById('{guiid}');
+				ifr.src=window.hasloaded;
+			}}
+		default:
+			if ({window}){{
+				targetwindow.postMessage({{content:{{data:'setorigin'}}}},'*');
+				targetwindow.postMessage(ms,'*');
+			}}
+			else {{
+				var fr=window.frames;
+				for (var i=0;i<fr.length;i++) {{
+					fr[i].postMessage({{content:{{data:'setorigin'}}}},'*');
+					fr[i].postMessage(ms,'*');
+				}}
+			}}
+			
 	}}
 }};
 window.setorigin=function(){{
@@ -422,12 +462,18 @@ if (1){{
 				//nb.insert_cell_below();
 				//nb.select_next();
 
+
 			}}
         	}}
 	}};
 }}
 }}
+}}else{{
+	var el=element.get(0);
+	el.appendChild(window.hasloaded[0]);
+}}
 """.format(**params)
+	params['pageloaded']=1
 	return js
 
 if __name__=="__main__":
