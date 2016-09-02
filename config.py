@@ -45,3 +45,6 @@ WORKDIR="{0}/fermi/.".format(HOME)
 COMMANDPOSTURL=POSTSERVER+"/commands/_design/"+HANDLE+"/_update/"+OPERATION+"/"+HPCSESSIONID
 RUNJOBPOSTURL=POSTSERVER+"/commands/_design/"+HANDLE+"/_update/pbssub/"+HPCSESSIONID
 DEFAULTFOLDER="webfolder"
+
+FILEDIR=WORKDIR.replace("/.","/")+DEFAULTFOLDER
+

@@ -5,7 +5,7 @@ import uuid,requests,base64,mimetypes,threading,os
 import myxattr as xattr 
 from sshtunnel import SSHTunnelForwarder as tunnel
 
-params={'logindone':0,'pageloaded':0,'sessionid':-1,'window':0,'destfolder':'webfolder','fileinputid':'loadfile','objname':__name__.split('.')[1],'guiid':'hpcclientwebui','width':1080,'height':900,'port':9123,'srcdoc':'','page':'fermi.html'}
+params={'logindone':0,'pageloaded':0,'sessionid':-1,'window':0,'destfolder':'{0}'.format(FILEDIR),'fileinputid':'loadfile','objname':__name__.split('.')[1],'guiid':'hpcclientwebui','width':1080,'height':900,'port':9123,'srcdoc':'','page':'fermi.html'}
 openfiles=dict()
 sharefiles=[]
 eventslistener=[]

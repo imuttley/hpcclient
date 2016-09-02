@@ -15,7 +15,7 @@ class th_fsevent(threading.Thread):
 	if error is not None:
             if DEBUG:print "error: {0}".format(error)
             pass
-        file=WORKDIR.replace("/.","/")+"webfolder/"+filename
+        file='{0}/{1}'.format(FILEDIR,filename)
         #filequeue.put(filename)
         #if DEBUG:print "file {0} {1}".format(filename,evnt)
         lockvar.acquire()
@@ -56,5 +56,5 @@ class th_fsevent(threading.Thread):
     def run(self):
         self.uvloop=self.pyuv.Loop.default_loop()
         self.fsevent=self.pyuv.fs.FSEvent(self.uvloop)
-        self.fsevent.start(WORKDIR.replace("/.","/")+"webfolder",0,self.fsprocess)
+        self.fsevent.start(FILEDIR,0,self.fsprocess)
         self.uvloop.run()
