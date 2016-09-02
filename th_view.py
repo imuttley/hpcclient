@@ -66,11 +66,6 @@ def sendevent(id,msg):
 
 """utility and interface functions"""
 
-"""TODO: ask for username and password"""
-def starttunnel():
-	server=tunnel(('login.marconi.cineca.it',22),ssh_pkey=('$HOME/.ssh/id_rsa'),ssh_username='tnicosia',local_bind_address=('localhost',9999),remote_bind_address=('r000u17l01',5984))
-	server.start()
-
 
 
 """send message to channel hpcclient"""
@@ -185,10 +180,14 @@ class myhtmlparse(HTMLParser):
 """procedure for login"""
 def verifypasswd(user=None,passwd=None):
 	if DEBUG: print 'login for {0}, passwd {1}'.format(user,passwd)
+	try:
+		[msgid for msgid in msgintf if msgintf[msgid](('verifypasswd',user,passwd))]
+	except:
+		pass
 	#TODO: verify an hash
-	if ((user=='test') and (passwd=='test')):
-		params['logindone']=1
-		_render('fermi.html')
+	#if ((user=='test') and (passwd=='test')):
+	#	params['logindone']=1
+	#	_render('fermi.html')
 
 """http method for widget"""
 def _httpget(page):
@@ -202,8 +201,16 @@ def _httpget(page):
 	params['srcdoc']="data:{0};base64,{1}".format(mimetypes.guess_type(filepath)[0],base64.b64encode(compiler.compiledhtml))
 
 def _render(page):
+	[msgid for msgid in msgintf if msgintf[msgid](('render',page))]
 	_httpget(page)
 	sendmsg("render",params['srcdoc'])
+
+def _logedon(arg):
+	if arg=='tunnelok':
+		params['logindone']=1
+		_render('fermi.html')
+msgintf.update({'ontunnel':_logedon})
+
 	
 """ javascript for widget """
 def _repr_javascript_():

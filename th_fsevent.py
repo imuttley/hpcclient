@@ -36,9 +36,11 @@ class th_fsevent(threading.Thread):
             else:
                 if DEBUG: print "{0}: deleted".format(filename)
             try:
-                self.xattr.getxattr(file,'user.author')
+                val=self.xattr.getxattr(file,'user.share')
             except Exception as e:
-                if append:
+                val={}
+	    finally:
+		if ((append) and (val=='true')):
                     #lockvar.acquire()
                     for ind in range(filequeue.qsize()):
                         upload=filequeue.get()
@@ -49,8 +51,6 @@ class th_fsevent(threading.Thread):
                 if DEBUG:print "fsevent exception {0}".format(e)
                 if DEBUG:print "{0} not have xattr user.author, push to db".format(filename)
                 #if QUEUE: print "{0} events {1}".format(filename,self.filestate[filename])
-            finally:
-                pass
         else:
             if DEBUG:print "{1} : {0} ".format(event,filename)
     def run(self):

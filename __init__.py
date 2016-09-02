@@ -31,8 +31,19 @@ from th_syncfs import *
 from . import th_view as marconiview
 
 """TODO: ask for username and password"""
-def definetunnel():
-        return tunnel(('login.marconi.cineca.it',22),ssh_pkey=('.myid/id_rsa'),ssh_username='tnicosia',local_bind_address=('localhost',9999),remote_bind_address=('r000u17l01',5984))
+def definetunnel(user,passwd):
+	return tunnel(('login.marconi.cineca.it',22),ssh_password=passwd,ssh_username=user,local_bind_address=('localhost',9999),remote_bind_address=('r000u17l01',5984))
+        #return tunnel(('login.marconi.cineca.it',22),ssh_pkey=('.myid/id_rsa'),ssh_username='tnicosia',local_bind_address=('localhost',9999),remote_bind_address=('r000u17l01',5984))
+
+def starttunnel(arg):
+        #start tunnel
+	if arg[0]=='verifypasswd':
+		user=arg[1]
+		passwd=arg[2]
+		if not 'tunnelconnect' in globals():
+                	tunnelconnect=definetunnel(user,passwd)
+                	tunnelconnect.start()
+msgintf.update({'onlogin':starttunnel})
 
 def printfilequeue():
     for ind in range(excludequeue.qsize()):
@@ -66,10 +77,6 @@ threads=['tunnelconnect','hpcout','hpcerr','getparams','th_out','th_err','hpcrpc
 #result=[k for k in initseq if initseq.k]
 
 
-#start tunnel
-if not 'tunnelconnect' in globals(): 
-	tunnelconnect=definetunnel()
-	tunnelconnect.start()
 
 #define queue for message
 if not 'hpcout' in globals(): hpcout=Queue()
