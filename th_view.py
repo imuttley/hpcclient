@@ -3,7 +3,6 @@ from config import *
 from HTMLParser import HTMLParser
 import uuid,requests,base64,mimetypes,threading,os
 import myxattr as xattr 
-from sshtunnel import SSHTunnelForwarder as tunnel
 
 params={'logindone':0,'pageloaded':0,'sessionid':-1,'window':0,'destfolder':'{0}'.format(FILEDIR),'fileinputid':'loadfile','objname':__name__.split('.')[1],'guiid':'hpcclientwebui','width':1080,'height':900,'port':9123,'srcdoc':'','page':'fermi.html'}
 openfiles=dict()
@@ -76,6 +75,9 @@ def sendmsg(sender,msg,raw=False):
         	msend=session.send(kernel.iopub_socket,session.msg("hpcclient",content={"response":sender,"data":"{0}".format(msg)}))
 	else:
 		msend=session.send(kernel.iopub_socket,session.msg("hpcclient",content={"response":sender,"data":msg}))
+"""full stat request"""
+def fullstat(jid):
+	print 'fullstat request for {0}'.format(jid)
 
 """runjob procedure message from iframe"""
 def runjob(arg):
@@ -85,13 +87,13 @@ def runjob(arg):
 
 """get a block of selected file"""
 def fileselect(name,offset=0,size=4*1024):
-	with open('{0}/{1}'.format(params['destfolder'],name),'r') as f:
+	with open('{0}/{1}'.format(FILEDIR,name),'r') as f:
 		f.seek(offset)
 		block=f.read(size)
         sendmsg("fileselect",{"name":name,"offset":offset,"blocksize":size,"block":block},raw=True)
 """write a block on selected file and offset"""
 def writeblock(name,offset=0,data=''):
-	with open('{0}/{1}'.format(params['destfolder'],name),'r+') as f:
+	with open('{0}/{1}'.format(FILEDIR,name),'r+') as f:
 		f.seek(offset)
 		f.write(data)
 
@@ -101,7 +103,7 @@ def write2file(filename,chunck=''):
 	if not chunck:
 		data=base64.b64decode(openfiles.pop(filename).split(',')[1])
 		#data=base64.b64decode(openfiles.pop(filename))
-		with open('{0}/{1}'.format(params['destfolder'],filename),'w') as f:
+		with open('{0}/{1}'.format(FILEDIR,filename),'w') as f:
 			f.write(data)
 	else:
 		if filename in openfiles:
@@ -112,23 +114,23 @@ def write2file(filename,chunck=''):
 
 """create a list of files with shared attribute set/clear.TODO:filter fo filetype"""
 def filelist():
-        resp=os.listdir(params['destfolder'])
-        checked=[ k for k in resp if 'user.share' in xattr.listxattr('{0}/{1}'.format(params['destfolder'],k))]
+        resp=os.listdir(FILEDIR)
+        checked=[ k for k in resp if 'user.share' in xattr.listxattr('{0}/{1}'.format(FILEDIR,k))]
         sendmsg("filelist",{"dir":resp,"checked":checked},raw=True)
 
 """set/clear file shared attribute."""		
 def sharedlist(*list):
 	sharefiles=[ f for f in list ]
-	allfiles=os.listdir(params['destfolder'])
+	allfiles=os.listdir(FILEDIR)
 	unsharefile=[ file for file in allfiles if file not in list]
 	for file in unsharefile:
 		try:
-			test=xattr.removexattr('{0}/{1}'.format(params['destfolder'],file),'user.share')
+			test=xattr.removexattr('{0}/{1}'.format(FILEDIR,file),'user.share')
 		except:
 			pass
 	for file in sharefiles:
 		try:
-			test=xattr.setxattr('{0}/{1}'.format(params['destfolder'],file),'user.share','true')
+			test=xattr.setxattr('{0}/{1}'.format(FILEDIR,file),'user.share','true')
 		except:
 			pass
 

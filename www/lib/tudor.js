@@ -148,14 +148,16 @@ function eventregistered(id,e){
 // function for queue div object
 function addjobelement(line,dstel){
 	var jobqre=/([0-9]{5}\.[0-9a-zA-Z]+)[ \t]+([a-z0-9A-Z]+)[ \t]+([a-z0-9A-Z]+)[ \t]+([a-z0-9A-Z]+).*/;
-	var j=line.match(jobqre);
+	var sl=line.split(' ');
+	j=[];
+	sl.map(function(e){if (e!='')j.push(e);});
 	var el=null;
 	if (j){
 		el=document.createElement('p');
-		el.setAttribute('onclick','console.log(this.id)');
-		el.id=j[1];
+		el.setAttribute('onclick','sendmsg('fullstat',this.id);');
+		el.id=j[0];
 		el.classList.add('queueid');
-		el.textContent=j[1]+' <'+j[4]+'>';
+		el.textContent=j[0]+' <'+j[3]+'> status:'+j[9];
 		dstel.appendChild(el);
 	}
 	return el;

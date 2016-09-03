@@ -7,9 +7,9 @@ def _readxfile():
 	try:
                 with open (XFILE,'r') as x:
                         filelistobj=eval(x.read())
+		return filelistobj
         except:
-                filelistobj={}
-	return filelistobj
+                return {}
 
 def getxattr(file,attr):
 	if DEBUG: print 'get xattr {0} of {2}'.format(k,v,file)
