@@ -3,11 +3,11 @@ from config import *
 import thread
 
 XFILE='.xattr'
-lockvar=thread.allocate_lock()
+xlockvar=thread.allocate_lock()
 
 def _readxfile():
 	try:
-		with lockvar:
+		with xlockvar:
                 	with open (XFILE,'r') as x:
                         	filelistobj=eval(x.read())
 			return filelistobj
@@ -23,7 +23,7 @@ def getxattr(file,attr):
 
 def listxattr(file):
 	try:
-		with lockvar:
+		with xlockvar:
 			with open(XFILE,'r') as x:
 				filelistobj=eval(x.read())
 			return filelistobj[file]
@@ -35,7 +35,7 @@ def removexattr(file,k):
 	if DEBUG: print 'remove xattr {0} to {2}'.format(k,v,file)
 	try:
 		obj[file].pop(k)
-		with lockvar:
+		with xlockvar:
 			with open (XFILE,'w') as x:
              			x.write('{0}'.format(obj))	
 	except:
@@ -48,7 +48,7 @@ def setxattr(file,k,v):
 		obj[file].update({k:v})
 	except:
 		obj.update({file:{k:v}})
-	with lockvar:
+	with xlockvar:
 		with open (XFILE,'w') as x:
 			x.write('{0}'.format(obj))
 
