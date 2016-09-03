@@ -152,7 +152,7 @@ function addjobelement(line,dstel){
 	j=[];
 	sl.map(function(e){if (e!='')j.push(e);});
 	var el=null;
-	if (j){
+	if (j.length>8){
 		el=document.createElement('p');
 		el.setAttribute('onclick','sendmsg('fullstat',this.id);');
 		el.id=j[0];
