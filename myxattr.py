@@ -1,13 +1,16 @@
 """ trick for replace xattr on window system """
 from config import *
+import thread
 
 XFILE='.xattr'
+lockvar=thread.allocate_lock()
 
 def _readxfile():
 	try:
-                with open (XFILE,'r') as x:
-                        filelistobj=eval(x.read())
-		return filelistobj
+		with lockvar:
+                	with open (XFILE,'r') as x:
+                        	filelistobj=eval(x.read())
+			return filelistobj
         except:
                 return {}
 
@@ -20,9 +23,10 @@ def getxattr(file,attr):
 
 def listxattr(file):
 	try:
-		with open(XFILE,'r') as x:
-			filelistobj=eval(x.read())
-		return filelistobj[file]
+		with lockvar:
+			with open(XFILE,'r') as x:
+				filelistobj=eval(x.read())
+			return filelistobj[file]
 	except:
 		return {}
 
@@ -31,8 +35,9 @@ def removexattr(file,k):
 	if DEBUG: print 'remove xattr {0} to {2}'.format(k,v,file)
 	try:
 		obj[file].pop(k)
-		with open (XFILE,'w') as x:
-             		x.write('{0}'.format(obj))	
+		with lockvar:
+			with open (XFILE,'w') as x:
+             			x.write('{0}'.format(obj))	
 	except:
 		pass
 
@@ -43,6 +48,7 @@ def setxattr(file,k,v):
 		obj[file].update({k:v})
 	except:
 		obj.update({file:{k:v}})
-	with open (XFILE,'w') as x:
-		x.write('{0}'.format(obj))
+	with lockvar:
+		with open (XFILE,'w') as x:
+			x.write('{0}'.format(obj))
 
