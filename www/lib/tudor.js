@@ -154,7 +154,7 @@ function addjobelement(line,dstel){
 	var el=null;
 	if (j.length>8){
 		el=document.createElement('p');
-		el.setAttribute('onclick','sendmsg('fullstat',this.id);');
+		el.setAttribute('onclick','sendmsg("fullstat",this.id);'));
 		el.id=j[0];
 		el.classList.add('queueid');
 		el.textContent=j[0]+' <'+j[3]+'> status:'+j[9];
