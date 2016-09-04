@@ -20,7 +20,7 @@ EVNTDEBUG=True
 FSDEBUG=True
 RJDEBUG=False
 REQ=False
-QUEUE=True
+QUEUE=False
 filequeue=Queue()
 excludequeue=Queue()
 lockvar=threading.Lock()
@@ -34,7 +34,7 @@ msgintf={'onevnt':msgintflog}
 
 kernel=get_ipython().kernel
 
-LOGINNODE='login.marconi.cineca.it'
+LOGINNODE='192.107.94.227'
 
 URL=None
 POSTDB="commands"

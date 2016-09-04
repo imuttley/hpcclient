@@ -34,7 +34,7 @@ window.onmessage=function(e){
 			mainwindow=e.source;
 			console.log('message from external iframe:',e.data.content);
 			var but=document.getElementById('loginbutton');
-			but.style.display='block';
+			but.style.opacity=1;
 			var spinner=document.getElementById('waitdiv');
 			spinner.style.display='none';
 		}
@@ -76,7 +76,7 @@ window.onmessage=function(e){
   				<div class="bounce2"></div>
   				<div class="bounce3"></div>
 			</div>
-			<input style="display:none;" id="loginbutton" onclick="verifypasswd(this);" type="submit" name="submit" value="Sign in">
+			<input style="opacity:0" id="loginbutton" onclick="verifypasswd(this);" type="submit" name="submit" value="Sign in">
 		    </p>       
 	</div>
 <!--</form>-->

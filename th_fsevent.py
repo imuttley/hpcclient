@@ -55,11 +55,13 @@ class th_fsevent(threading.Thread):
                 		#if not append:print "excluded {0}".format(filename)
             			append=self.xattr.getxattr(file,'user.share')
 				if (append=='true'):
-					for ind in range(filequeue.qsize()):
-                                        	upload=filequeue.get()
-                                        	if upload==file:break
-                                        	filequeue.put(upload)
-                                	filequeue.put(file)
+					self.xattr.setxattr(file,'user.sync','false')	
+				#if (append=='true'):
+				#	for ind in range(filequeue.qsize()):
+                                #        	upload=filequeue.get()
+                                #        	if upload==file:break
+                                #        	filequeue.put(upload)
+                                #	filequeue.put(file)
 				
 			else:
                 		if FSDEBUG: print "{0}: deleted".format(filename)

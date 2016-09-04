@@ -14,15 +14,14 @@ class th_pushattach(threading.Thread):
     def delete(self,localfile):
 	dsturl=POSTSERVER+"/folders/"+self.folder
 	try:
+		filename=localfile.split('/').pop()
 		req=self.requests.get(dsturl)
 		jsoncontent=eval(req.content.replace("true","True").replace("false","False"))
 		rev=req.headers['ETag'].replace("\"","")
-		jsonobj={"_attachments":{self.filename:{"content_type":"","data":""}}}
 		headers={"If-Match":rev}
-		data=str(jsonobj).replace("\'","\"")
-		url=dsturl+"/"+localfile.obj.split('/').pop()
+		url=dsturl+"/"+filename
 		req=self.requests.delete(url,headers=headers)
-		if REQ:print "attachment send, response:{0}".format(req)
+		if REQ:print "attachment delete, response:{0}".format(req)
     		self.xattr.removexattr(localfile,'user.sync')
 		#TODO remove db stat
 	except Exception as e:
@@ -32,7 +31,8 @@ class th_pushattach(threading.Thread):
 	dsturl=POSTSERVER+"/folders/"+self.folder
 	if QUEUE: print "{0}->{1}".format(localfile,dsturl)
 	sync=False
-	self.filestat={localfile:{"author":ME,"comment":"created from xxxxxxx","mtime":"now"}}
+	filename=localfile.split('/').pop()
+	self.filestat={filename:{"author":ME,"comment":"created from xxxxxxx","mtime":"now"}}
 	try:
 		req=self.requests.get(dsturl)
 		jsoncontent=eval(req.content.replace("true","True").replace("false","False"))
@@ -45,16 +45,16 @@ class th_pushattach(threading.Thread):
 		with open(localfile,"rb") as fhnd: filedata=(fhnd.read())
 		self.mimetypes.init()
 		filecontenttype, encode=self.mimetypes.guess_type(localfile)
-		jsonobj={"_attachments":{self.filename:{"content_type":filecontenttype,"data":filedata}}}
+		jsonobj={"_attachments":{filename:{"content_type":filecontenttype,"data":filedata}}}
 		headers={"Content-Transfer-Encoding": "base64","Content-Type":filecontenttype,"If-Match":rev}
 		data=str(jsonobj).replace("\'","\"")
-		url=dsturl+"/"+localfile.split('/').pop()
+		url=dsturl+"/"+filename
 		req=self.requests.put(url,headers=headers,data=filedata)
 		if REQ:print "attachment send, response:{0}".format(req)
 		if req.status_code != 409 :
 			updateurl=POSTSERVER+"/folders/_design/folder/_update/append/"+self.folder
 			if DEBUG:print updateurl
-			req=self.requests.put(updateurl+"?filename="+localfile.split('/').pop()+"&author="+ME+"&comment=none")
+			req=self.requests.put(updateurl+"?filename="+filename+"&author="+ME+"&comment=none")
 			if REQ:print req.text
 			self.xattr.setxattr(localfile,'user.sync','true')
 	except Exception as e:
@@ -79,13 +79,14 @@ class th_pushattach(threading.Thread):
                     else: 
 			if QUEUE: print "file not exists {0}".format(localfile)
 		except Exception as e:
-                    print "{0} must be deleted TODO".format(self.filename)
-                
-		if (self.xattr.getxattr(localfile,'user.share')=='true'):
-			print 'share {0}'.format(localfile)
+                    self.delete(localfile)
+               
+		sync=self.xattr.getxattr(localfile,'user.sync')
+		share=self.xattr.getxattr(localfile,'user.share') 
+		#print 'sync:{0} share:{1} file:{2}'.format(sync,share,localfile)
+		if ((share=='true') and (sync!='true')):
+			#print 'share {0}'.format(localfile)
 			self.put(localfile)
-		else:
-			print 'delete {0}'.format(localfile)
-			#self.delete(localfile)
-		continue
-
+		if (share!='true'):
+			#print 'delete {0}'.format(localfile)
+			self.delete(localfile)

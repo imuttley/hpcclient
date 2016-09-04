@@ -35,25 +35,25 @@ class th_getattach(threading.Thread):
                 except Exception as e:
                     if DEBUG:print e
                     sync=True
-        if ((not exists)|(sync)):
-            try:
-                self.os.makedirs(dstdir)
-            except Exception as e:
-                pass
-            if DEBUG:print "exclude {0} for upload".format(self.filename)
-
-            with open(dstfile,"wb") as fhnd:
-                res=self.requests.get(srcurl,stream=True)
-                if res.ok:
-                    md5sum=self.md5()
-                    for chunck in res.iter_content(1024*10):
-                        md5sum.update(chunck)
-                        fhnd.write(chunck)
-                    fhnd.flush()
-                    self.xattr.setxattr(dstfile,'user.md5',self.base64.b64encode(md5sum.digest()))
-                    self.xattr.setxattr(dstfile,'user.author',self.stat['author'])
-                    self.xattr.setxattr(dstfile,'user.comment',self.stat['comment'])
-            if DEBUG:print '{0} writed'.format(self.filename)
+            if ((not exists)|(sync)):
+            	try:
+                	self.os.makedirs(dstdir)
+            	except Exception as e:
+                	pass
+            	if DEBUG:print "exclude {0} for upload".format(self.filename)
+	
+           	with open(dstfile,"wb") as fhnd:
+                	res=self.requests.get(srcurl,stream=True)
+                	if res.ok:
+                    		md5sum=self.md5()
+                    		for chunck in res.iter_content(1024*10):
+                        		md5sum.update(chunck)
+                        		fhnd.write(chunck)
+                    		fhnd.flush()
+		self.xattr.setxattr(dstfile,'user.md5',self.base64.b64encode(md5sum.digest()))
+		self.xattr.setxattr(dstfile,'user.author',self.stat['author'])
+		self.xattr.setxattr(dstfile,'user.comment',self.stat['comment'])
+            	if DEBUG:print '{0} writed'.format(self.filename)
 
 
 

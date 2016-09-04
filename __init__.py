@@ -46,7 +46,11 @@ def starttunnel(arg):
 		passwd=arg[2]
 		if not 'tunnelconnect' in globals():
                 	tunnelconnect=definetunnel(user,passwd)
-                	tunnelconnect.start()
+                	try:
+				tunnelconnect.start()
+				[msgid for msgid in msgintf if msgintf[msgid]('tunnelok')]
+			except:
+				[msgid for msgid in msgintf if msgintf[msgid]('loginfailure')]
 msgintf.update({'onlogin':starttunnel})
 
 def printfilequeue():

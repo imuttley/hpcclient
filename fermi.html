@@ -229,24 +229,26 @@ window.onload=function(){
 </div>
 
 <!-- <div class="form" onclick="togglesubmit();"></div> -->
-<div  id="marconi" class="form-3">
+<div  id="marconi" class="submit">
 	<!-- POST parameters and parse to xmlrpc with fixed variable for usercntx -->
 	<!-- <form id="pbssubform" method="post" action="commands/_design/schedule/_update/runjob/marconisessionid">  -->
 		<!-- general -->
 		<!-- <input type="text" name="comment" >
 		<label for="comment">Comment</label> -->
-		<p>
 		<input type="text" name="job_name" pattern="[^ \t]">
 		<label for="job_name">Job_name</label>
-		</p>
+		
+		
 		<input type="text" name="walltime">
 		<label for="walltime">Walltime</label>
+		
 		<!--  <input type="text" name="queue" pattern="[^ \t]">
 		<label for="queue">queue</label>-->
 
 		<!-- resources -->
 		<input type="number" size="6" name="processes" min="1">
 		<label for="processes">Processes</label>
+		
 		<!-- <input type="number" size="5" name="select" min="1" >
 		<label for="select">vnodes</label>
 		<input type="number" size="5" name="ncpus" min="1" >
@@ -255,10 +257,13 @@ window.onload=function(){
 		<!-- memory M/G -->
 		<input type="text" size="5" name="mem" min="1" >
 		<label for="mem">memory per nodes(MB)</label>
+		
 		<!-- <input type="number" size="5" name="mpiprocs" min="1" >
 		<label for="mpiprocs">mpiprocess_per_node</label> -->
+
 		<input type="text" name="exe"> <!-- main procedure for $arch/special command -->
 		<label for="exe">Command</label>
+		
 		<!-- array -->
 		<!-- module fixed from pbsfixed.js 
 		<input type="hidden" name="module"> 
@@ -268,7 +273,9 @@ window.onload=function(){
 		<!-- <input type="text" name="args" pattern="[^ \t]"> --><!-- mpi python etc.. -->
 		<!-- <label onclick="addarg(this);" for="args">args</label> -->
 		<!-- labels -->
+		
 		<input type="submit" onclick="jobsubmit(this)">
+		
 	<!-- </form>  -->
 </div>
 <div  id="fermi" class="submit">
