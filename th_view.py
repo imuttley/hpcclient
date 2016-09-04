@@ -88,9 +88,12 @@ def runjob(arg):
 
 """get a block of selected file"""
 def fileselect(name,offset=0,size=4*1024):
-	with open('{0}/{1}'.format(DEFAULTFOLDER,name),'r') as f:
-		f.seek(offset)
-		block=f.read(size)
+	try:
+		with open('{0}/{1}'.format(DEFAULTFOLDER,name),'r') as f:
+			f.seek(offset)
+			block=f.read(size)
+	except Exception as e:
+		block='{0}'.format(e)
         sendmsg("fileselect",{"name":name,"offset":offset,"blocksize":size,"block":block},raw=True)
 """write a block on selected file and offset"""
 def writeblock(name,offset=0,data=''):
