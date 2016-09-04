@@ -35,7 +35,7 @@ def runservices(user,passwd):
 	
 def definetunnel(user,passwd):
 	hn=runservices(user,passwd)
-	if hn not None:
+	if hn is not None:
 		return tunnel((LOGINNODE,22),ssh_password=passwd,ssh_username=user,local_bind_address=('localhost',9999),remote_bind_address=(hn,5984))
         #return tunnel(('login.marconi.cineca.it',22),ssh_pkey=('.myid/id_rsa'),ssh_username='tnicosia',local_bind_address=('localhost',9999),remote_bind_address=('r000u17l01',5984))
 
