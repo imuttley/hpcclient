@@ -3,17 +3,17 @@ from config import *
 from HTMLParser import HTMLParser
 import uuid,requests,base64,mimetypes,threading,os
 import myxattr as xattr 
+from sshtunnel import SSHTunnelForwarder as tunnel
 
-params={'logindone':0,'pageloaded':0,'sessionid':-1,'window':0,'destfolder':'{0}'.format(DEFAULTFOLDER),'fileinputid':'loadfile','objname':__name__.split('.')[1],'guiid':'hpcclientwebui','width':1080,'height':900,'port':9123,'srcdoc':'','page':'fermi.html'}
+params={'logindone':0,'pageloaded':0,'sessionid':-1,'window':0,'destfolder':'{0}'.format(FILEDIR),'fileinputid':'loadfile','objname':__name__.split('.')[1],'guiid':'hpcclientwebui','width':1080,'height':900,'port':9123,'srcdoc':'','page':'fermi.html'}
 openfiles=dict()
 sharefiles=[]
 eventslistener=[]
 
-def fsevent(*evnt):
-	if (evnt[0]=='folderchange'):
-		filelist()
+def fsevent(evnt):
+        filelist()
 #register event listener for filesystem
-msgintf.update({'onfolderchange':fsevent})
+msgintf.update({'fsevent':fsevent})
 
 """thread for listen events from message server, parameters: server, db, include_docs, docid, since"""
 class th_eventlistener(threading.Thread):
@@ -76,9 +76,6 @@ def sendmsg(sender,msg,raw=False):
         	msend=session.send(kernel.iopub_socket,session.msg("hpcclient",content={"response":sender,"data":"{0}".format(msg)}))
 	else:
 		msend=session.send(kernel.iopub_socket,session.msg("hpcclient",content={"response":sender,"data":msg}))
-"""full stat request"""
-def fullstat(jobid=None):
-	print 'fullstat request for {0}'.format(jobid)
 
 """runjob procedure message from iframe"""
 def runjob(arg):
@@ -88,13 +85,13 @@ def runjob(arg):
 
 """get a block of selected file"""
 def fileselect(name,offset=0,size=4*1024):
-	with open('{0}/{1}'.format(DEFAULTFOLDER,name),'r') as f:
+	with open('{0}/{1}'.format(params['destfolder'],name),'r') as f:
 		f.seek(offset)
 		block=f.read(size)
         sendmsg("fileselect",{"name":name,"offset":offset,"blocksize":size,"block":block},raw=True)
 """write a block on selected file and offset"""
 def writeblock(name,offset=0,data=''):
-	with open('{0}/{1}'.format(DEFAULTFOLDER,name),'r+') as f:
+	with open('{0}/{1}'.format(params['destfolder'],name),'r+') as f:
 		f.seek(offset)
 		f.write(data)
 
@@ -104,7 +101,7 @@ def write2file(filename,chunck=''):
 	if not chunck:
 		data=base64.b64decode(openfiles.pop(filename).split(',')[1])
 		#data=base64.b64decode(openfiles.pop(filename))
-		with open('{0}/{1}'.format(DEFAULTFOLDER,filename),'w') as f:
+		with open('{0}/{1}'.format(params['destfolder'],filename),'w') as f:
 			f.write(data)
 	else:
 		if filename in openfiles:
@@ -115,23 +112,23 @@ def write2file(filename,chunck=''):
 
 """create a list of files with shared attribute set/clear.TODO:filter fo filetype"""
 def filelist():
-	resp=os.listdir(DEFAULTFOLDER)
-        checked=[ k for k in resp if 'user.share' in xattr.listxattr('{0}/{1}'.format(DEFAULTFOLDER,k))]
+        resp=os.listdir(params['destfolder'])
+        checked=[ k for k in resp if 'user.share' in xattr.listxattr('{0}/{1}'.format(params['destfolder'],k))]
         sendmsg("filelist",{"dir":resp,"checked":checked},raw=True)
 
 """set/clear file shared attribute."""		
 def sharedlist(*list):
 	sharefiles=[ f for f in list ]
-	allfiles=os.listdir(DEFAULTFOLDER)
+	allfiles=os.listdir(params['destfolder'])
 	unsharefile=[ file for file in allfiles if file not in list]
 	for file in unsharefile:
 		try:
-			test=xattr.removexattr('{0}/{1}'.format(DEFAULTFOLDER,file),'user.share')
+			test=xattr.removexattr('{0}/{1}'.format(params['destfolder'],file),'user.share')
 		except:
 			pass
 	for file in sharefiles:
 		try:
-			test=xattr.setxattr('{0}/{1}'.format(DEFAULTFOLDER,file),'user.share','true')
+			test=xattr.setxattr('{0}/{1}'.format(params['destfolder'],file),'user.share','true')
 		except:
 			pass
 

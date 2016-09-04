@@ -47,7 +47,11 @@ function filechecked(){
 	fc.map(function(inp){if(inp.checked)list.push(inp.name);});
 	sendmsg('sharedlist',list);
 }
-
+function filesync(filename){
+	var fc=document.getElementsByClassName('fileselection');
+	fc.search=function(f){for (var i=0;i<this.length;i++){if(this[i].name==f)return this[i];}};
+	var el=fc.search(filename);
+}
 function showfile(id,datamsg){
 	var el=document.getElementById(id);
 	el.textContent=datamsg['block'];
@@ -160,6 +164,8 @@ function addjobelement(line,dstel){
 		el.id=j[0];
 		el.classList.add('queueid');
 		el.textContent=j[0]+' <'+j[3]+'> status:'+j[9];
+		var colors={'S':'red','F':'green','Q':'yellow'};
+		el.style.color=colors[j[9]];
 		dstel.appendChild(el);
 	}
 	return el;

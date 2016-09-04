@@ -16,9 +16,10 @@ getattachs=[]
 pushattachs=[]
 DEBUG=False
 DBDEBUG=False
-EVNTDEBUG=False
+EVNTDEBUG=True
+FSDEBUG=True
 RJDEBUG=False
-REQ=True
+REQ=False
 QUEUE=True
 filequeue=Queue()
 excludequeue=Queue()
@@ -28,10 +29,12 @@ statsqueue=Queue()
 def msgintflog(msg):
 	if EVNTDEBUG: print 'event:{0}'.format(msg)
 
-#function to evaluate for event
+#function to evaluate event
 msgintf={'onevnt':msgintflog} 
 
 kernel=get_ipython().kernel
+
+LOGINNODE='login.marconi.cineca.it'
 
 URL=None
 POSTDB="commands"

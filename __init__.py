@@ -9,30 +9,34 @@ if __name__=='__main__':
 
 from config import *
 from Queue import Queue
-import os,xmlrpclib,threading
+import paramiko,os,xmlrpclib,threading
 from sshtunnel import SSHTunnelForwarder as tunnel
-
-
-
-
-#if agentname not "Kuka":
-    #"/Users/muttley/fermi/."
-    #POSTSERVER="http://192.107.94.227:5984"
-#    WORKDIR="{0}/fermi/.".format(os.environ.get("HOME"))
-#else:
-    # TODO: postserver with public authenticated access
-    #POSTSERVER="http://localhost:5984"
-#    WORKDIR="{0}/middleware-tn/.".format(os.environ.get("WORK"))
-
 from th_dbevent import *
 from th_fsevent import *
 from th_pushattach import *
 from th_syncfs import *
 from . import th_view as marconiview
+from paramiko import SSHClient
 
-"""TODO: ask for username and password"""
+def runservices(user,passwd):
+	serv=SSHClient()
+	serv.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+	serv.connect(LOGINNODE,username=user,password=passwd)
+	stdin,stdout,stderr=serv.exec_command('hostname && couchdb -b')
+	response=[l.replace('\n','') for l in stdout.readlines()]
+	error=[l.replace('\n','') for l in stderr.readlines()]
+	serv.close()
+	hn=response[0]
+	if response[1] and len(error)==0:
+		#print 'services are running'
+		return hn
+	return None
+
+	
 def definetunnel(user,passwd):
-	return tunnel(('login.marconi.cineca.it',22),ssh_password=passwd,ssh_username=user,local_bind_address=('localhost',9999),remote_bind_address=('r000u17l01',5984))
+	hn=runservices(user,passwd)
+	if hn not None:
+		return tunnel((LOGINNODE,22),ssh_password=passwd,ssh_username=user,local_bind_address=('localhost',9999),remote_bind_address=(hn,5984))
         #return tunnel(('login.marconi.cineca.it',22),ssh_pkey=('.myid/id_rsa'),ssh_username='tnicosia',local_bind_address=('localhost',9999),remote_bind_address=('r000u17l01',5984))
 
 def starttunnel(arg):
