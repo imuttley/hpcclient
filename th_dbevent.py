@@ -15,8 +15,8 @@ class th_dbeventlisten(threading.Thread):
 	for line in r.iter_lines():
 	    try:
 		if (len(line)>1):
-                	jsonresp=eval(line)
-			[msgid for msgid in msgintf if msgintf[msgid]((db,jsonresp['doc']['post']))]
+			jsonresp=eval(line)
+			[msgid for msgid in msgintf if msgintf[msgid]((self.db,jsonresp['doc']['post']))]
 			self.queue.put(jsonresp['doc']['post'].replace("\n",""),False)
             except Exception as e:
                 if DBDEBUG: print "excetion from call chunck {0}: {1}".format(self.name,e)
