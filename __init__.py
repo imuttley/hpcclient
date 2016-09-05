@@ -22,12 +22,12 @@ def runservices(user,passwd):
 	serv=SSHClient()
 	serv.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 	serv.connect(LOGINNODE,username=user,password=passwd)
-	stdin,stdout,stderr=serv.exec_command('hostname && couchdb -b')
+	stdin,stdout,stderr=serv.exec_command('./runservice.sh')
 	response=[l.replace('\n','') for l in stdout.readlines()]
 	error=[l.replace('\n','') for l in stderr.readlines()]
 	serv.close()
 	hn=response[0]
-	if response[1] and len(error)==0:
+	if hn and len(error)==0:
 		#print 'services are running'
 		return hn
 	return None
@@ -66,6 +66,11 @@ def hpcclientlog(event,filename,evnt,error):
     else:
         if DEBUG:print "{0} {1}".format(filename,evnt)
 
+def hpciolog(arg):
+    if (HPCIO and ((arg[0]=='stdout')|(arg[0]=='stderr'))):
+	print 'hpc.{0}: {1}'.format(arg[0],arg[1])
+msgintf.update({'onhpcio':hpciolog})
+		
 
 class execute():
 	def __init__(self,function,arg):

@@ -16,11 +16,12 @@ getattachs=[]
 pushattachs=[]
 DEBUG=False
 DBDEBUG=False
-EVNTDEBUG=True
-FSDEBUG=True
+EVNTDEBUG=False
+FSDEBUG=False
 RJDEBUG=False
 REQ=False
 QUEUE=False
+HPCIO=True
 filequeue=Queue()
 excludequeue=Queue()
 lockvar=threading.Lock()
@@ -34,7 +35,7 @@ msgintf={'onevnt':msgintflog}
 
 kernel=get_ipython().kernel
 
-LOGINNODE='192.107.94.227'
+LOGINNODE='login.marconi.cineca.it'
 
 URL=None
 POSTDB="commands"
