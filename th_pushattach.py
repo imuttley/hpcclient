@@ -23,7 +23,7 @@ class th_pushattach(threading.Thread):
 		req=self.requests.delete(url,headers=headers)
 		if REQ:print "attachment delete, response:{0}".format(req)
     		if req.status_code != 409 :
-                        deleteurl=POSTSERVER+"/folders/_design/folder/_update/deletea/"+self.folder
+                        deleteurl=POSTSERVER+"/folders/_design/folder/_update/delete/"+self.folder
                         if DEBUG:print deleteurl
                         req=self.requests.put(deleteurl+"?filename="+filename)
                         if REQ:print req.text

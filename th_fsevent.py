@@ -77,5 +77,5 @@ class th_fsevent(threading.Thread):
     def run(self):
         self.uvloop=self.pyuv.Loop.default_loop()
         self.fsevent=self.pyuv.fs.FSEvent(self.uvloop)
-        self.fsevent.start(FILEDIR,0,self.folderchange)
+        self.fsevent.start(DEFAULTFOLDER,0,self.folderchange)
         self.uvloop.run()
