@@ -11,11 +11,12 @@ class th_dbeventlisten(threading.Thread):
 	self.db=db
 	self.queue=q
     def chunck(self,r,*arg,**kwarg):
-	[msgid for msgid in msgintf if msgintf[msgid]('chunck')]
+	#[msgid for msgid in msgintf if msgintf[msgid]('chunck']
 	for line in r.iter_lines():
 	    try:
 		if (len(line)>1):
                 	jsonresp=eval(line)
+			[msgid for msgid in msgintf if msgintf[msgid]((db,jsonresp['doc']['post']))]
 			self.queue.put(jsonresp['doc']['post'].replace("\n",""),False)
             except Exception as e:
                 if DBDEBUG: print "excetion from call chunck {0}: {1}".format(self.name,e)

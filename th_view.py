@@ -120,7 +120,8 @@ def write2file(filename,chunck=''):
 def filelist():
 	resp=os.listdir(DEFAULTFOLDER)
         checked=[ k for k in resp if 'user.share' in xattr.listxattr('{0}/{1}'.format(DEFAULTFOLDER,k))]
-        sendmsg("filelist",{"dir":resp,"checked":checked},raw=True)
+        checkable=[ local for local in resp if 'user.author' not in xattr.listxattr('{0}/{1}'.format(DEFAULTFOLDER,local)]
+	sendmsg("filelist",{"dir":resp,"checked":checked,"local":checkable},raw=True)
 
 """set/clear file shared attribute."""		
 def sharedlist(*list):

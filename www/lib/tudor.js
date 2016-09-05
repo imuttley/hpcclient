@@ -59,7 +59,7 @@ function showfile(id,datamsg){
 	el.blockoffset=datamsg['offset'];
 	el.blocksize=datamsg['blocksize'];
 }
-function fileelement(filename,el){
+function fileelement(filename,el,ischecked,islocal){
 	var inp=document.createElement('input');
         var spn=document.createElement('span');
         var br=document.createElement('br');
@@ -67,8 +67,8 @@ function fileelement(filename,el){
         inp.name=filename;
         inp.className='fileselection';
         inp.onclick=filechecked;
-        inp.checked=(checked.indexOf(inp.name)!=-1);
-        el.appendChild(inp);
+        inp.checked=ischecked;
+        if (islocal) el.appendChild(inp);
         spn.id=filename;
         spn.setAttribute('onclick','getblock(this.id,0)');
         spn.textContent=filename;
@@ -78,10 +78,11 @@ function fileelement(filename,el){
 function showlist(id,listmsg){
         var el=document.getElementById(id);
         var files=eval(listmsg.dir);
-        checked=eval(listmsg.checked);
+        var checked=eval(listmsg.checked);
+	var local=eval(listmsg.local);
         var ul=document.createElement('ul');
 	while (el.hasChildNodes()) el.removeChild(el.firstChild);
-	files.map(function(name){fileelement(name,el);});
+	files.map(function(name){fileelement(name,el,checked.indexOf(name)!=-1,local.indexOf(name)!=-1);});
 }
 function oldshowlist(id,listmsg){
 	var el=document.getElementById(id);
