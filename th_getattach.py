@@ -14,8 +14,9 @@ class th_getattach(threading.Thread):
         self.stat=stat
         self.attrib=attrib
     def run(self):
-        dstdir=WORKDIR.replace("/.","")+"/"+self.folder
-        dstfile=dstdir+"/"+self.filename
+        #dstdir=WORKDIR.replace("/.","")+"/"+self.folder
+        dstdir=self.folder
+	dstfile=dstdir+"/"+self.filename
         srcurl=POSTSERVER+"/folders/"+self.folder+"/"+self.filename
         if DEBUG:print "{0}->{1}".format(srcurl,dstfile)
         exists=(os.path.exists(dstfile))
