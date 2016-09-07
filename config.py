@@ -1,11 +1,17 @@
 from Queue import Queue
 import threading,os
 
-POSTSERVER="http://localhost:9999"
-try:
-	ME=os.environ['USER']
-except:
-	ME='windows'
+if 'HPCAGENT' in os.environ:
+	POSTSERVER="http://127.0.0.1:5984"
+	kernel=None
+	ME=os.environ['HPCAGENT']
+else:
+	POSTSERVER="http://localhost:9999"
+	kernel=get_ipython().kernel
+	try:
+		ME=os.environ['USER']
+	except:
+		ME='windows'
 
 try:
 	HOME=os.environ['HOME']
@@ -33,8 +39,6 @@ def msgintflog(msg):
 #function to evaluate event
 msgintf={'onevnt':msgintflog} 
 
-kernel=get_ipython().kernel
-
 LOGINNODE='login.marconi.cineca.it'
 
 URL=None
@@ -48,6 +52,7 @@ WORKDIR="{0}/fermi/.".format(HOME)
 
 COMMANDPOSTURL=POSTSERVER+"/commands/_design/"+HANDLE+"/_update/"+OPERATION+"/"+HPCSESSIONID
 RUNJOBPOSTURL=POSTSERVER+"/commands/_design/"+HANDLE+"/_update/pbssub/"+HPCSESSIONID
+
 DEFAULTFOLDER="webfolder"
 
 FILEDIR=WORKDIR.replace("/.","/")+DEFAULTFOLDER

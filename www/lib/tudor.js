@@ -182,7 +182,8 @@ function queuelist(id,msg){
 			var divel=document.getElementById(id);
 			while (divel.hasChildNodes()) divel.removeChild(divel.firstChild);
 			doc.jobquery.split('\n').map(function(e){addjobelement(e,divel);});
-			//divel.innerHTML=doc.jobquery;
+			var fstatel=document.getElementById('stat');
+			fstatel.textContent=doc.fullstat;
 		}
         }
 }

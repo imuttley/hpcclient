@@ -70,7 +70,11 @@ def hpciolog(arg):
     if (HPCIO and ((arg[0]=='stdout')|(arg[0]=='stderr'))):
 	print 'hpc.{0}: {1}'.format(arg[0],arg[1])
 msgintf.update({'onhpcio':hpciolog})
-		
+
+def postfullstat(arg):
+        if (arg[0]=='postfullstat'):
+                hpcrpc.fullstat(arg[1])
+msgintf.update({'onfullstat':postfullstat})		
 
 class execute():
 	def __init__(self,function,arg):
@@ -92,21 +96,24 @@ threads=['tunnelconnect','hpcout','hpcerr','getparams','th_out','th_err','hpcrpc
 
 
 #define queue for message
-if not 'hpcout' in globals(): hpcout=Queue()
-if not 'hpcerr' in globals(): hpcerr=Queue()
-#if not 'agentname' in globals(): raise Exception('Agent name not set')
+if 'HPCAGENT' not in os.environ:
+	if not 'hpcout' in globals(): hpcout=Queue()
+	if not 'hpcerr' in globals(): hpcerr=Queue()
+	#if not 'agentname' in globals(): raise Exception('Agent name not set')
+	# input channel
+	if not 'hpcrpc' in globals(): 
+		hpcrpc=xmlrpclib.ServerProxy(COMMANDPOSTURL)
 
+	if not 'th_out' in globals():
+		th_out=th_dbeventlisten('marconistdout_thread',HPCSESSIONID,'stdout',hpcout)
+		th_out.daemon=True
+		th_out.start() 
+	if not 'th_err' in globals():
+        	th_err=th_dbeventlisten('marconistderr_thread',HPCSESSIONID,'stderr',hpcerr)
+        	th_err.daemon=True
+        	th_err.start() 
+	
 
-# input channel
-if not 'hpcrpc' in globals(): hpcrpc=xmlrpclib.ServerProxy(COMMANDPOSTURL)
-if not 'th_out' in globals():
-	th_out=th_dbeventlisten('marconistdout_thread',HPCSESSIONID,'stdout',hpcout)
-	th_out.daemon=True
-	th_out.start() 
-if not 'th_err' in globals():
-        th_err=th_dbeventlisten('marconistderr_thread',HPCSESSIONID,'stderr',hpcerr)
-        th_err.daemon=True
-        th_err.start() 
 if not 'th_fs' in globals():
 	th_fs=th_syncfilesystem('fs','1223')
 	th_fs.daemon=True

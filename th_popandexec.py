@@ -7,9 +7,10 @@ from multiprocessing import Process
 agentname='Morg'
 os.environ['HPCAGENT']=agentname
 # file replication module
-from hpcclient import *
+import config
+from . import *
 
-#from th_pipe2post import th_pipe2post
+from th_pipe2post import *
 
 bashout=''
 proc=dict()
