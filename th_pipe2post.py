@@ -1,5 +1,5 @@
 import threading
-from agent_Morg import couchinfo
+from config import couchinfo
 
 # thread for pipe redirector
 # arg: fd pipe file descriptor from subprocess

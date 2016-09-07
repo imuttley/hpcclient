@@ -26,8 +26,9 @@ class th_eventlistener(threading.Thread):
 	self.kernel=kernel	
     
     def reply(self,msg,raw=False):
-	session=self.kernel.session
-        msend=session.send(self.kernel.iopub_socket,session.msg("hpcclient",content={"response":self.name,"data":msg}))
+	if self.kernel is not None:
+		session=self.kernel.session
+        	msend=session.send(self.kernel.iopub_socket,session.msg("hpcclient",content={"response":self.name,"data":msg}))
  
     def proxyevent(self,resp,*arg,**kwarg):
 	if not resp._content_consumed:	
@@ -70,12 +71,12 @@ def sendevent(id,msg):
 
 """send message to channel hpcclient"""
 def sendmsg(sender,msg,raw=False):
-	#kernel=get_ipython().kernel
-	session=kernel.session
-	if not raw:
-        	msend=session.send(kernel.iopub_socket,session.msg("hpcclient",content={"response":sender,"data":"{0}".format(msg)}))
-	else:
-		msend=session.send(kernel.iopub_socket,session.msg("hpcclient",content={"response":sender,"data":msg}))
+	if kernel is not None:
+		session=kernel.session
+		if not raw:
+        		msend=session.send(kernel.iopub_socket,session.msg("hpcclient",content={"response":sender,"data":"{0}".format(msg)}))
+		else:
+			msend=session.send(kernel.iopub_socket,session.msg("hpcclient",content={"response":sender,"data":msg}))
 """full stat request"""
 def fullstat(jobid=None):
 	#print 'fullstat request for {0}'.format(jobid)

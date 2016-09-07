@@ -9,11 +9,13 @@ os.environ['HPCAGENT']=agentname
 # file replication module
 from hpcclient import *
 from hpcclient.th_pipe2post import th_pipe2post
+from hpcclient.config import couchinfo
 
 bashout=''
 proc=dict()
 pid=0
 me=config.ME
+user=os.environ['USER']
 
 submitformkey=set(["job_type","job_name","output","input","error","shell","wall_clock_limit","notification","notify_user","bg_size","bg_connectivity","account_no","environment","comment","arguments","step_name","initialdir","requirements","restart","shell"])
 runjobkey=set(["np","stdinrank","raise","python","mpi"])
@@ -135,15 +137,15 @@ class th_popandexec(threading.Thread):
 	result=submit.communicate()[0]
 	#send to couchdb jobid or error to display
 	couchinfo('qsub response:{0}'.format(result))
-	##res=requests.post('{0}/users/_design/jobs/_update/batch/{1}'.format(AGENTSERVER,me),data=@open('web.job','r'))
-	res=requests.post('{0}/users/_design/jobs/_update/submit/{1}'.format(AGENTSERVER,me),data=result)
+	##res=requests.post('{0}/users/_design/jobs/_update/batch/{1}'.format(AGENTSERVER,user),data=@open('web.job','r'))
+	res=requests.post('{0}/users/_design/jobs/_update/submit/{1}'.format(AGENTSERVER,user),data=result)
 
         return
     def qselect(self):
         qselect=self.subprocess.Popen(['qselect','-xu','{0}'.format(me)],stdout=self.subprocess.PIPE)
         result=qselect.communicate()[0]
         #couchinfo('qselect response:{0}'.format(result))
-        res=requests.post('{0}/users/_design/jobs/_update/history/{1}'.format(AGENTSERVER,me),data=result)
+        res=requests.post('{0}/users/_design/jobs/_update/history/{1}'.format(AGENTSERVER,user),data=result)
         return
     def fullstat(self):
         #qselect=self.subprocess.Popen(['qselect','-xu','{0}'.format(me)],stdout=self.subprocess.PIPE)
@@ -151,7 +153,7 @@ class th_popandexec(threading.Thread):
 	qstat=self.subprocess.Popen(['qstat','-x','-f',self.param[0]],stdout=self.subprocess.PIPE)
         result=qstat.communicate()[0]
         couchinfo('qstat response:{0}'.format(result))
-        res=requests.post('{0}/users/_design/jobs/_update/fullstat/{1}'.format(AGENTSERVER,me),data=result)
+        res=requests.post('{0}/users/_design/jobs/_update/fullstat/{1}'.format(AGENTSERVER,user),data=result)
         return
     def restart(self):
         couchinfo('execute restart from main thread')
@@ -195,8 +197,6 @@ class th_popandexec(threading.Thread):
 	    self.printexception("route exception",e)	
 
 
-def couchinfo(arg):
-    print '[\"log\",\"{0}\"]'.format(arg)
 
 def createthread(sessionid):
     couchinfo("create thread for id {0}".format(sessionid))
@@ -234,7 +234,7 @@ def runagent():
 
         qstat=subprocess.Popen(['qstat','-T','-x','-u','{0}'.format(me)],stdout=subprocess.PIPE)
         result=qstat.communicate()[0]
-        res=requests.post('{0}/users/_design/jobs/_update/jobqueue/{1}'.format(AGENTSERVER,me),data=result)
+        res=requests.post('{0}/users/_design/jobs/_update/jobqueue/{1}'.format(AGENTSERVER,user),data=result)
         time.sleep(5)
 
 if __name__=="__main__":

@@ -39,6 +39,10 @@ def msgintflog(msg):
 #function to evaluate event
 msgintf={'onevnt':msgintflog} 
 
+def couchinfo(arg):
+    print '[\"log\",\"{0}\"]'.format(arg)
+
+
 LOGINNODE='login.marconi.cineca.it'
 
 URL=None

@@ -53,7 +53,9 @@ class th_fsevent(threading.Thread):
                			# who create, me or not ?!
                 		#LOCK
                 		#if not append:print "excluded {0}".format(filename)
-            			append=self.xattr.getxattr(file,'user.share')
+            			if 'HPCAGENT' in self.os.environ:
+					self.xattr.setxattr(file,'user.share','true')
+				append=self.xattr.getxattr(file,'user.share')
 				if (append=='true'):
 					self.xattr.setxattr(file,'user.sync','false')	
 				#if (append=='true'):
