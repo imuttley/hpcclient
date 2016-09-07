@@ -235,11 +235,15 @@ def runagent():
     couchinfo('start agent services')
     while True:
         requests.post('{0}/agents/_design/heartbeat/_update/agent/{1}'.format(AGENTSERVER,agentname),hooks=dict(response=createprocess))
-
         qstat=subprocess.Popen(['qstat','-T','-x','-u','{0}'.format(user)],stdout=subprocess.PIPE)
         result=qstat.communicate()[0]
         res=requests.post('{0}/users/_design/jobs/_update/jobqueue/{1}'.format(AGENTSERVER,user),data=result)
-        time.sleep(5)
+        dir=os.listdir(config.DEFAULTFOLDER)
+	for file in dir:
+		if 'user.author' not in xattr.listxattr('{0}/{1}'.format(config.DEFAULTFOLDER,file)):
+			with open ('{0}/{1}'.format(config.DEFAULTFOLDER,file),'a'):
+				os.utime('{0}/{1}'.format(config.DEFAULTFOLDER,file),None)
+	time.sleep(6)
 
 if __name__=="__main__":
     runagent()
