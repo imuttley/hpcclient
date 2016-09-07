@@ -78,7 +78,8 @@ def sendmsg(sender,msg,raw=False):
 		msend=session.send(kernel.iopub_socket,session.msg("hpcclient",content={"response":sender,"data":msg}))
 """full stat request"""
 def fullstat(jobid=None):
-	print 'fullstat request for {0}'.format(jobid)
+	#print 'fullstat request for {0}'.format(jobid)
+	[msgid for msgid in msgintf if msgintf[msgid](('postfullstat',jobid.split('.')[0]))]
 
 """runjob procedure message from iframe"""
 def runjob(arg):

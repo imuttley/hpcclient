@@ -1,3 +1,4 @@
+import threading
 from agent_Morg import couchinfo
 
 # thread for pipe redirector
@@ -10,7 +11,7 @@ class th_pipe2post(threading.Thread):
     def __init__(self,server,fd,sessionid,name,bufsize=1000):
         super(th_pipe2post,self).__init__()
         self.pipe=fd
-	self.sever=server
+	self.server=server
         self.sessionid=sessionid
         self.bufsize=bufsize
         self.name=name

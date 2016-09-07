@@ -8,8 +8,7 @@ agentname='Morg'
 os.environ['HPCAGENT']=agentname
 # file replication module
 from hpcclient import *
-
-#from th_pipe2post import th_pipe2post
+from hpcclient.th_pipe2post import th_pipe2post
 
 bashout=''
 proc=dict()
