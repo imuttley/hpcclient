@@ -17,6 +17,7 @@ from th_pushattach import *
 from th_syncfs import *
 from . import th_view as marconiview
 from paramiko import SSHClient
+import myxattr as xattr
 
 def runservices(user,passwd):
 	serv=SSHClient()
@@ -76,6 +77,20 @@ def postfullstat(arg):
                 hpcrpc.fullstat(arg[1])
 msgintf.update({'onfullstat':postfullstat})		
 
+
+def changex(arg):
+        if arg[0]=='folderchange':
+		couchinfo('change folder file {0}'.format(arg[1]))
+                author=xattr.getxattr(arg[1],'user.author')
+                if 'user.author' not in xattr.listxattr(arg[1]):
+                        xattr.setxattr(arg[1],'user.share','true')
+                else:
+                        if (author==ME):
+                                xattr.setxattr(arg[1],'user.share','true')
+if 'HPCAGENT' in os.environ:
+	msgintf.update({'agentfolderchange':changex})
+
+
 class execute():
 	def __init__(self,function,arg):
 		self._function=function
@@ -112,6 +127,7 @@ if 'HPCAGENT' not in os.environ:
         	th_err=th_dbeventlisten('marconistderr_thread',HPCSESSIONID,'stderr',hpcerr)
         	th_err.daemon=True
         	th_err.start() 
+	
 	
 
 if not 'th_fs' in globals():

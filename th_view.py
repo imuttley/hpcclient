@@ -26,10 +26,11 @@ class th_eventlistener(threading.Thread):
 	self.kernel=kernel	
     
     def reply(self,msg,raw=False):
-	if self.kernel is not None:
+	try:
 		session=self.kernel.session
-        	msend=session.send(self.kernel.iopub_socket,session.msg("hpcclient",content={"response":self.name,"data":msg}))
- 
+       		msend=session.send(self.kernel.iopub_socket,session.msg("hpcclient",content={"response":self.name,"data":msg}))
+ 	except Exception as e:
+		pass
     def proxyevent(self,resp,*arg,**kwarg):
 	if not resp._content_consumed:	
 		for line in resp.iter_lines():

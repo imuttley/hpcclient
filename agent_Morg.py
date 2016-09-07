@@ -10,7 +10,7 @@ os.environ['HPCAGENT']=agentname
 from hpcclient import *
 from hpcclient.th_pipe2post import th_pipe2post
 from hpcclient.config import couchinfo
-from hpcclient.config import msgintf
+#from hpcclient.config import msgintf
 
 bashout=''
 proc=dict()
@@ -28,7 +28,7 @@ SHELL='/bin/bash'
 class th_popandexec(threading.Thread):
     import os,requests,time
     import xmlrpclib,subprocess,sys
-    import hpcclient.myxattr as xattr
+    from hpcclient import myxattr as xattr
  
     def getagentvars(self,res,*arg,**kwargs):
 	couchinfo(res)
@@ -43,13 +43,8 @@ class th_popandexec(threading.Thread):
         self.shell=self.subprocess.Popen([SHELL],stdin=self.subprocess.PIPE,stdout=self.subprocess.PIPE,stderr=self.subprocess.PIPE,shell=True)
         self.outtopost=th_pipe2post(AGENTSERVER,self.shell.stdout,sessionid,'stdout')
         self.errtopost=th_pipe2post(AGENTSERVER,self.shell.stderr,sessionid,'stderr')
-	msgintf.update({'agentonfolder':self.folderchange})
 	
-    def folderchange(self,arg):
-	if arg[0]=='folderchange':
-		couchinfo('setxattr to file {0}'.format(arg[1])
-		self.xattr.setxattr(arg[1],'user.share','true')
-	
+
 
     def printexception(self,msg,e):
 	couchinfo("popandexec exception:{0} {1}".format(msg,e))
@@ -241,7 +236,7 @@ def runagent():
     while True:
         requests.post('{0}/agents/_design/heartbeat/_update/agent/{1}'.format(AGENTSERVER,agentname),hooks=dict(response=createprocess))
 
-        qstat=subprocess.Popen(['qstat','-T','-x','-u','{0}'.format(me)],stdout=subprocess.PIPE)
+        qstat=subprocess.Popen(['qstat','-T','-x','-u','{0}'.format(user)],stdout=subprocess.PIPE)
         result=qstat.communicate()[0]
         res=requests.post('{0}/users/_design/jobs/_update/jobqueue/{1}'.format(AGENTSERVER,user),data=result)
         time.sleep(5)

@@ -22,8 +22,8 @@ getattachs=[]
 pushattachs=[]
 DEBUG=False
 DBDEBUG=False
-EVNTDEBUG=False
-FSDEBUG=False
+EVNTDEBUG=True
+FSDEBUG=True
 RJDEBUG=False
 REQ=False
 QUEUE=False
@@ -41,7 +41,6 @@ msgintf={'onevnt':msgintflog}
 
 def couchinfo(arg):
     print '[\"log\",\"{0}\"]'.format(arg)
-
 
 LOGINNODE='login.marconi.cineca.it'
 
