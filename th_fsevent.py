@@ -53,8 +53,8 @@ class th_fsevent(threading.Thread):
                			# who create, me or not ?!
                 		#LOCK
                 		#if not append:print "excluded {0}".format(filename)
-            			if 'HPCAGENT' in self.os.environ:
-					self.xattr.setxattr(file,'user.share','true')
+            			#if 'HPCAGENT' in self.os.environ:
+				#	self.xattr.setxattr(file,'user.share','true')
 				append=self.xattr.getxattr(file,'user.share')
 				if (append=='true'):
 					self.xattr.setxattr(file,'user.sync','false')	
@@ -75,7 +75,7 @@ class th_fsevent(threading.Thread):
 	except Exception as e:
 		if FSDEBUG:print "fsexception: {0}".format(e)
     	finally:
-		[msgid for msgid in msgintf if msgintf[msgid]('folderchange')]
+		[msgid for msgid in msgintf if msgintf[msgid](('folderchange',file))]
     def run(self):
         self.uvloop=self.pyuv.Loop.default_loop()
         self.fsevent=self.pyuv.fs.FSEvent(self.uvloop)

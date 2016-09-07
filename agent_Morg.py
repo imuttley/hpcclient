@@ -10,6 +10,7 @@ os.environ['HPCAGENT']=agentname
 from hpcclient import *
 from hpcclient.th_pipe2post import th_pipe2post
 from hpcclient.config import couchinfo
+from hpcclient.config import msgintf
 
 bashout=''
 proc=dict()
@@ -25,9 +26,10 @@ AGENTSERVER=config.POSTSERVER
 SHELL='/bin/bash'
 
 class th_popandexec(threading.Thread):
-    import os,pycurl,requests,time
+    import os,requests,time
     import xmlrpclib,subprocess,sys
-
+    import hpcclient.myxattr as xattr
+ 
     def getagentvars(self,res,*arg,**kwargs):
 	couchinfo(res)
     def __init__(self,id,sessionid):
@@ -41,6 +43,13 @@ class th_popandexec(threading.Thread):
         self.shell=self.subprocess.Popen([SHELL],stdin=self.subprocess.PIPE,stdout=self.subprocess.PIPE,stderr=self.subprocess.PIPE,shell=True)
         self.outtopost=th_pipe2post(AGENTSERVER,self.shell.stdout,sessionid,'stdout')
         self.errtopost=th_pipe2post(AGENTSERVER,self.shell.stderr,sessionid,'stderr')
+	msgintf.update({'agentonfolder':self.folderchange})
+	
+    def folderchange(self,arg):
+	if arg[0]=='folderchange':
+		couchinfo('setxattr to file {0}'.format(arg[1])
+		self.xattr.setxattr(arg[1],'user.share','true')
+	
 
     def printexception(self,msg,e):
 	couchinfo("popandexec exception:{0} {1}".format(msg,e))
