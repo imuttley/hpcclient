@@ -5,15 +5,17 @@ import os
 
 def xattrprocess(arg):
 	if ((arg[0]=='setxattr') or (arg[0]=='removexattr')):
-		print 'xattrprocess:{0}'.format(arg)
+		#print 'xattrprocess:{0}'.format(arg)
 		filedir=os.listdir(DEFAULTFOLDER)
                 toshare=[ file for file in filedir if 'user.share' in xattr.listxattr('{0}/{1}'.format(DEFAULTFOLDER,file))]
 		file=arg[1]
-		for ind in range(filequeue.qsize()):
-			upload=filequeue.get()
-			if upload==file: break
-			filequeue.put(upload)
-		filequeue.put(file)
+		gets=[thread for thread in getattachs if thread.filename==file]
+		if ((os.stat(file).st_size>1) & (len(gets)==0)):
+			for ind in range(filequeue.qsize()):
+				upload=filequeue.get()
+				if upload==file: break
+				filequeue.put(upload)
+			filequeue.put(file)
 	
 		
 # from host --> db

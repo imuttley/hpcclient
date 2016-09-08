@@ -238,8 +238,13 @@ def runagent():
         qstat=subprocess.Popen(['qstat','-T','-x','-u','{0}'.format(user)],stdout=subprocess.PIPE)
         result=qstat.communicate()[0]
         res=requests.post('{0}/users/_design/jobs/_update/jobqueue/{1}'.format(AGENTSERVER,user),data=result)
-        dir=os.listdir(config.DEFAULTFOLDER)
-	for file in dir:
+        localdir=os.listdir(config.DEFAULTFOLDER)
+	res=requests.get('{0}/folders/{1}'.format(AGENTSERVER,'webfolder'))
+	obj=res.content.replace('true','True').replace('false','False')
+	stats=eval(obj)['stats']
+	remotedir=[file for file in stats]
+	diff=[file for file in localdir if file not in remotedir]
+	for file in diff:
 		if 'user.author' not in xattr.listxattr('{0}/{1}'.format(config.DEFAULTFOLDER,file)):
 			with open ('{0}/{1}'.format(config.DEFAULTFOLDER,file),'a'):
 				os.utime('{0}/{1}'.format(config.DEFAULTFOLDER,file),None)

@@ -1,6 +1,8 @@
 """ object for listen db _attachments change """
 from config import *
 from th_getattach import *
+import os
+import myxattr as xattr
 
 # from db to host
 class th_syncfilesystem(threading.Thread):
@@ -10,7 +12,7 @@ class th_syncfilesystem(threading.Thread):
     	self.id=id
 	self.sessionid=sessionid
     def getfilename(self,r,*arg,**kwarg):
-	[msgid for msgid in msgintf if msgintf[msgid]('getfilename')]
+	[msgid for msgid in msgintf if msgintf[msgid]((self,'getfilename'))]
 	for line in r.iter_lines():
             	if len(line)>2:
                 	try:
@@ -51,11 +53,14 @@ def getattach(files,folder,stats):
     statsqueue.put(stats)
     lockvar.release()
     if DEBUG:print "stats: {0}".format(stats)
-    for filename in files:
-        attrib=files[filename]
-        if DEBUG:print "{0} {1} size: {2}".format(filename,attrib['digest'].replace("md5-","md5: "),attrib['length'])
-        ttg=th_getattach(filename,folder,stats[filename],attrib)
-        getattachs.append(ttg)
-        ttg.start()
-
+    for filename in stats:
+        if filename in files:
+		[msgid for msgid in msgintf if msgintf[msgid](('getattach',filename))]
+		attrib=files[filename]
+		if DEBUG:
+			print "stats: {0}".format(stats[filename]) 
+			print "{0} {1} size: {2}".format(filename,attrib['digest'].replace("md5-","md5: "),attrib['length'])
+		ttg=th_getattach(filename,folder,stats[filename],files[filename])
+        	getattachs.append(ttg)
+		ttg.start()
 

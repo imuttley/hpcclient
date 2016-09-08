@@ -165,7 +165,8 @@ function addjobelement(line,dstel){
 		el.id=j[0];
 		el.classList.add('queueid');
 		el.textContent=j[0]+' <'+j[3]+'> status:'+j[9];
-		var colors={'S':'red','F':'green','Q':'yellow'};
+		// in accord to qstat man
+		var colors={'B':'white','E':'orange','H':'white','M':'white','R':'orangered','T':'lawngreen','U':'floralwhite','W':'white','X':'azure','S':'red','F':'green','Q':'yellow'};
 		el.style.color=colors[j[9]];
 		dstel.appendChild(el);
 	}

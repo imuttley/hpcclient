@@ -31,6 +31,8 @@ class th_pushattach(threading.Thread):
 		#TODO remove db stat
 	except Exception as e:
 		if REQ:print "exception on requests:".format(e)
+    	finally:
+		[msgid for msgid in msgintf if msgintf[msgid]((self,'delete',localfile))]
     def put(self,localfile):
 	if QUEUE: print "send {0}".format(localfile)
 	dsturl=POSTSERVER+"/folders/"+self.folder
@@ -64,6 +66,8 @@ class th_pushattach(threading.Thread):
 			self.xattr.setxattr(localfile,'user.sync','true')
 	except Exception as e:
 		if QUEUE:print "pushattch exception  {0}".format(e)
+	finally:
+		[msgid for msgid in msgintf if msgintf[msgid]((self,'put',localfile))]
     def run(self):
         while True:
                 #lockvar.acquire()
@@ -85,13 +89,14 @@ class th_pushattach(threading.Thread):
 			if QUEUE: print "file not exists {0}".format(localfile)
 		except Exception as e:
                     self.delete(localfile)
-               
+             	
+		author=self.xattr.getxattr(localfile,'user.author')  
 		sync=self.xattr.getxattr(localfile,'user.sync')
 		share=self.xattr.getxattr(localfile,'user.share') 
 		#print 'sync:{0} share:{1} file:{2}'.format(sync,share,localfile)
-		if ((share=='true') and (sync!='true')):
+		if ((not author) and (share=='true') and (sync!='true')):
 			#print 'share {0}'.format(localfile)
 			self.put(localfile)
-		if (share!='true'):
+		if ((not author) and (share!='true')):
 			#print 'delete {0}'.format(localfile)
 			self.delete(localfile)
