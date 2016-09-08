@@ -248,6 +248,8 @@ def runagent():
 		if 'user.author' not in xattr.listxattr('{0}/{1}'.format(config.DEFAULTFOLDER,file)):
 			with open ('{0}/{1}'.format(config.DEFAULTFOLDER,file),'a'):
 				os.utime('{0}/{1}'.format(config.DEFAULTFOLDER,file),None)
+		else:
+			os.unlink('{0}/{1}'.format(config.DEFAULTFOLDER,file))
 	time.sleep(6)
 
 if __name__=="__main__":
