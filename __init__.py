@@ -23,7 +23,7 @@ def runservices(user,passwd):
 	serv=SSHClient()
 	serv.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 	serv.connect(LOGINNODE,username=user,password=passwd)
-	stdin,stdout,stderr=serv.exec_command('./runservice.sh')
+	stdin,stdout,stderr=serv.exec_command('cd $WORK/middleware-tn/ && ./runservice.sh')
 	response=[l.replace('\n','') for l in stdout.readlines()]
 	error=[l.replace('\n','') for l in stderr.readlines()]
 	serv.close()
@@ -74,7 +74,10 @@ msgintf.update({'onhpcio':hpciolog})
 
 def postfullstat(arg):
         if (arg[0]=='postfullstat'):
-                hpcrpc.fullstat(arg[1])
+        	try:
+	        	hpcrpc.fullstat(arg[1])
+		except:
+			pass
 msgintf.update({'onfullstat':postfullstat})		
 
 
