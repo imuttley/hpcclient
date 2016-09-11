@@ -13,7 +13,6 @@
 - HTMLParser
 - base64
 - hashlib
-- xattr
 
 
 ------------------
@@ -22,7 +21,6 @@
 > python 2.7 modules needed
 >
 - pyuv
-- xattr
 - hashlib
 - base64
 - multiprocessing

@@ -6,11 +6,37 @@ if __name__=='__main__':
 	print 'load as module'
 	pass
 
-
+#check dependecies
+import sys
+try:
+	import pip
+except:
+	print 'pip module not installed!'
+	raise StandardError('install pip module!')
+	
 from config import *
 from Queue import Queue
-import paramiko,os,xmlrpclib,threading
+
+try:
+        from sshtunnel import SSHTunnelForwarder as tunnel
+except:
+        pip.main(['install','--user','sshtunnel'])
 from sshtunnel import SSHTunnelForwarder as tunnel
+
+try:
+	import paramiko
+except:
+	pip.main(['install','--user','paramiko'])
+import paramiko
+try:
+	import xmlrpclib
+except:
+	 pip.main(['install','--user','xmlrpclib'])
+
+import xmlrpclib
+import os
+import threading
+
 from th_dbevent import *
 from th_fsevent import *
 from th_pushattach import *

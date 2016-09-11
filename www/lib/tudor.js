@@ -15,7 +15,13 @@ var msgfunction={'filelist':{elemid:'folder',onmessage:showlist},
 		'eventproxy':{elemid:'',onmessage:eventregistered},
 		'test':{elemid:'',onmessage:msglog},
 		'queuelist':{elemid:'queue',onmessage:queuelist},
+		'showmime':{elemid:'graph',onmessage:showmime},
+		'hpcout':{elemid:'cli',onmessage:tocli},
 		'jobstat':{elemid:'stat',onmessage:msglog}};
+
+var behaviour={'divgraph':{'onclick':'fullscreen','onmouseover':'delay(1,fullscreen)','onmouseleave':'cleardelay(fullscreen)'},
+		'diveditor':{'onclick':'fullscreen','onmouseover':'delay(1,fullscreen)','onmouseleave':'cleardelay(fullscreen)'}};
+
 
 var getquery={id:'',server:'http://localhost:9999',db:'',include_docs:'true',docid:'',since:'now'};
 var dbfunction={};
@@ -38,8 +44,35 @@ var credential={
 	user:'tnicosia',password:null
 };
 
-//var jobqueue=eventfordiv('jobquery','queue');
+function tocli(id,msg){
+	var cli=document.getElementById(id);
+	var stream=Object.keys(msg);
+	stream.map(function(str){cli.insertAdjacentHTML('beforeend', msg[str]+'<br>');});
+}
 
+function setevent(elem,msg){
+        var that=document.getElementById(elem);
+        var ev=Object.keys(msg);
+        ev.map(function(evnt){that[evnt]=eval(msg[evnt]);});
+}
+
+function elemmap(vr){
+        var elem=Object.keys(vr);
+        elem.map(function(id){setevent(id,vr[id]);});
+}
+
+
+function fullscreen(elem){
+	console.log('fullscreen ',elem.target);
+	
+}
+function cleardelay(func){
+	return function(i){TweenLite.killDelayedCallsTo(func);};
+}
+//var jobqueue=eventfordiv('jobquery','queue');
+function delay(d,func){
+	return function(i){TweenLite.delayedCall(d,func,[i]);};
+}
 function filechecked(){
 	var fc=document.getElementsByClassName('fileselection');
 	var list=[];
@@ -52,9 +85,20 @@ function filesync(filename){
 	fc.search=function(f){for (var i=0;i<this.length;i++){if(this[i].name==f)return this[i];}};
 	var el=fc.search(filename);
 }
+function showmime(id,datamsg){
+        var divembed=document.getElementById(id);
+	var embed=document.createElement('iframe');
+	embed.setAttribute('type',datamsg.src.split(';')[0].replace('data:',''));
+        embed.style.width='100%';
+	embed.style.height='100%';
+	embed.src=datamsg.src;
+	while (divembed.hasChildNodes()) divembed.removeChild(divembed.firstChild);
+	divembed.appendChild(embed);
+}
 function showfile(id,datamsg){
 	var el=document.getElementById(id);
-	el.textContent=datamsg['block'];
+	var res=window.hljs.highlightAuto(datamsg['block']);
+	el.innerHTML=res.value;
 	el.filename=datamsg['name'];
 	el.blockoffset=datamsg['offset'];
 	el.blocksize=datamsg['blocksize'];
@@ -268,8 +312,8 @@ function editorfunc(e){
 		if (off<0) off=0;
 	}
 	getblock(e.target.filename,off);
-	console.log('editor text area blocksize:',e.target.textLength);	
-	console.log('editor cursor position:',e.target.selectionEnd);
+	//console.log('editor text area blocksize:',e.target.textLength);	
+	//console.log('editor cursor position:',e.target.selectionEnd);
 }
 function getdir(){
 	sendmsg('filelist',null);
@@ -299,6 +343,9 @@ function tudorevents(){
 	registertoeventproxy();	
 	getdir();	
 	countdown();
+
+	elemmap(behaviour);	
+	
 	//window.localdb=new PouchDB(dbfolder);	
 	window.onmessage=function(e){
 	        if (window.location.origin!=e.origin){

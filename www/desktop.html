@@ -3,22 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/hldefault.css">
 
-<!--<script src="lib/mimic.js"></script>-->
+<script src="lib/mimic.js"></script>
 <script src="lib/TweenMax.min.js"></script>
 <!--<script src="lib/pouchdb-5.3.2.js"></script>--> 
-<script src="lib/highlight.pack.js"></script>
-<!--<script>window.hljs=hljs;hljs.initHighlightingOnLoad();</script>-->
+
 <script src="lib/tudor.js"></script> 
 
 <script src="lib/ScrollMagic.js"></script>
 <script src="lib/plugins/animation.gsap.js"></script>
 <script src="lib/plugins/debug.addIndicators.js"></script>
-<!--<script src="lib/highlight.pack.js"></script>-->
 
 <script>
-
 
 function ready(fn) {
     if (document.readyState != 'loading')
@@ -185,10 +181,9 @@ window.onload=function(){
 	<div class="ndescription" >
 		Redirect to NSG portal for HPC computation
 	</div>
-	<div id="divgraph" class="ddescription">
+	<div class="ddescription">
 		<small>Graph</small>
-		<div id="graph"></div>
-		<!--<embed id="graph" style="width:80%;height:90%"/>-->
+		<iframe id="graph" border="0" style="width:80%;height:90%"></iframe>
 		
 	</div>
 </div>
@@ -213,22 +208,23 @@ window.onload=function(){
 	<div class="ndescription" >
 		Redirect to NSG portal for HPC computation
 	</div>
-	<div id="diveditor" class="ddescription">
+	<div class="ddescription">
 		<small>Editor</small>
-		<pre><code class="text" id="editor"></code></pre>
+		<textarea style="height:90%;width:100%;font-size:18px" id="editor">
+		</textarea>
 	</div>
 </div>
-<div class="dpanel mid leftb" >
+<!--<div class="dpanel mid leftb" >
 	<div class="ndescription" >
 		Redirect to NSG portal for HPC computation
 	</div>
 	<div class="ddescription">
-		<small>CLI</small>
-		<div id="cli">
-		a simple cli shell to tx stdin and rx stdout/err
+		<h1>Rss</h1>
+		<div id="rss">
+		Rss service view
 		</div>
 	</div>
-</div>
+</div>-->
 
 <!-- <div class="form" onclick="togglesubmit();"></div> -->
 <div  id="marconi" class="form-3">

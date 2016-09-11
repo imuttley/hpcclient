@@ -26,7 +26,7 @@ AGENTSERVER=config.POSTSERVER
 SHELL='/bin/bash'
 
 class th_popandexec(threading.Thread):
-    import os,requests,time
+    import io,os,requests,time
     import xmlrpclib,subprocess,sys
     from hpcclient import myxattr as xattr
  
@@ -40,10 +40,13 @@ class th_popandexec(threading.Thread):
 	#	self.requests.get("http://127.0.0.1:5984/agents/{0}".format(self.name),hooks=dict(response=self.agentvars))
         self.updaterev=0
         #TODO get shell from db
-        self.shell=self.subprocess.Popen([SHELL],stdin=self.subprocess.PIPE,stdout=self.subprocess.PIPE,stderr=self.subprocess.PIPE,shell=True)
-        self.outtopost=th_pipe2post(AGENTSERVER,self.shell.stdout,sessionid,'stdout')
-        self.errtopost=th_pipe2post(AGENTSERVER,self.shell.stderr,sessionid,'stderr')
-	
+	self.rout, self.wout=self.os.pipe()
+	self.rerr, self.werr=self.os.pipe()
+	self.rfdout,self.wfdout=self.io.open(self.rout,'rb',0),os.fdopen(self.wout,'wb',0)
+	self.rfderr,self.wfderr=self.io.open(self.rerr,'rb',0),os.fdopen(self.werr,'wb',0)
+	self.shell=self.subprocess.Popen([SHELL],stdin=self.subprocess.PIPE,stdout=self.wfdout,stderr=self.wfderr,shell=True)
+	self.outtopost=th_pipe2post(AGENTSERVER,self.rfdout,sessionid,'stdout',bufsize=4000)
+	self.errtopost=th_pipe2post(AGENTSERVER,self.rfderr,sessionid,'stderr',bufsize=4000)	
 
 
     def printexception(self,msg,e):

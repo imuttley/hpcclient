@@ -15,6 +15,12 @@ def fsevent(*evnt):
 #register event listener for filesystem
 msgintf.update({'onfolderchange':fsevent})
 
+def stdotocli(evnt):
+	if (evnt[0]=='stdout') | (evnt[0]=='stderr'):
+		sendmsg("hpcout",{evnt[0]:evnt[1]},raw=True)
+
+msgintf.update({'hpctobrowser':stdotocli})
+
 """thread for listen events from message server, parameters: server, db, include_docs, docid, since"""
 class th_eventlistener(threading.Thread):
     import requests,time
@@ -83,6 +89,14 @@ def fullstat(jobid=None):
 	#print 'fullstat request for {0}'.format(jobid)
 	[msgid for msgid in msgintf if msgintf[msgid](('postfullstat',jobid.split('.')[0]))]
 
+"""show file to graph embed"""
+def showtograph(filename=None):
+	filepath='{0}/{1}'.format(DEFAULTFOLDER,filename)
+	with open (filepath,'rb') as file:
+		src=file.read()
+	srcdata="data:{0};base64,{1}".format(mimetypes.guess_type(filepath)[0],base64.b64encode(src))
+	sendmsg("showmime",{"src":srcdata},raw=True)
+
 """runjob procedure message from iframe"""
 def runjob(arg):
 	url='{0}?{1}'.format(RUNJOBPOSTURL,arg)
@@ -92,9 +106,19 @@ def runjob(arg):
 """get a block of selected file"""
 def fileselect(name,offset=0,size=4*1024):
 	try:
-		with open('{0}/{1}'.format(DEFAULTFOLDER,name),'r') as f:
-			f.seek(offset)
-			block=f.read(size)
+		filepath='{0}/{1}'.format(DEFAULTFOLDER,name)
+		type=mimetypes.guess_type(filepath)[0]
+		if type and 'text' not in type:
+			return showtograph(name)
+		else:
+			if os.stat(filepath).st_size<offset:
+				block='End of file'
+				offset=os.stat(filepath).st_size
+			else:
+				with open(filepath,'r') as f:
+					f.seek(offset)
+					block=f.read(size)
+			#TODO return EOF if offset > size
 	except Exception as e:
 		block='{0}'.format(e)
         sendmsg("fileselect",{"name":name,"offset":offset,"blocksize":size,"block":block},raw=True)
