@@ -20,7 +20,7 @@ var msgfunction={'filelist':{elemid:'folder',onmessage:showlist},
 		'jobstat':{elemid:'stat',onmessage:msglog}};
 
 var behaviour={'fullscreencloser':{'onclick':'closefs','onmouseover':'delay(1,closefs)','onmouseleave':'cleardelay(closefs)'},
-		'graphexpander':{'onclick':'openfs','onmouseover':'delay(1,openfs)','onmouseleave':'cleardelay(openfs)'},
+		'graphexpander':{'onclick':'openfsgraph','onmouseover':'delay(1,openfsgraph)','onmouseleave':'cleardelay(openfsgraph)'},
 		'editorexpander':{'onclick':'openfseditor','onmouseover':'delay(1,openfseditor)','onmouseleave':'cleardelay(openfseditor)'}};
 
 
@@ -68,11 +68,18 @@ function closefs(elem){
 	fs.childNodes.forEach(function(node){if (node.id!='fullscreencloser') fs.removeChild(node);});
 	fs.classList.remove('active');
 }
-function openfs(elem){
+function openfsgraph(elem){
 	var fs=document.getElementById('fullscreen');
-	var head=document.getElementById('fshead');
-	head.innerText=elem.target.innerText+' '+elem.target.filename;
-	fs.classList.add('active');
+	var source=document.getElementById('graph');
+	fs.core=source.childNodes[0];
+	fs.destination=source;
+	fs.childNodes.forEach(function(node){if (node.id!='fullscreencloser') fs.removeChild(node);});	
+	if (fs.core){
+		var head=document.getElementById('fshead');
+		head.innerText='Graph';
+		fs.appendChild(fs.core);
+		fs.classList.add('active');
+	}
 }
 function openfseditor(elem){
 	var fs=document.getElementById('fullscreen');
@@ -119,11 +126,12 @@ function filesync(filename){
 	var el=fc.search(filename);
 }
 function showmime(id,datamsg){
-        var divembed=document.getElementById(id);
+	var divembed=document.getElementById(id);
 	var embed=document.createElement('iframe');
 	embed.setAttribute('type',datamsg.src.split(';')[0].replace('data:',''));
-        embed.style.width='100%';
-	embed.style.height='100%';
+	embed.style.width='95%';
+	embed.style.height='95%';
+	embed.style.position='relative';
 	embed.src=datamsg.src;
 	while (divembed.hasChildNodes()) divembed.removeChild(divembed.firstChild);
 	divembed.appendChild(embed);
