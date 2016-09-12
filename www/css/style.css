@@ -277,20 +277,36 @@ b{
  
     overflow:auto;
    
-    transform: rotateX(-90deg);
+    transform: rotateX(-90deg) translateZ(10px);
     transform-origin: 100% 0;
     transition: .2s;
     
-    -webkit-transform: rotateX(-90deg);
+    -webkit-transform: rotateX(-90deg) translateZ(10px);
     -webkit-transform-origin: 100% 0;
     -webkit-transition: .2s;
 }
 .ddescription:hover{
-	transform: rotateX(-90deg) translate(30px) scale(1.2);
-	-webkit-transform: rotateX(-90deg) transloate(30px) scale(1.2);
+	transform: rotateX(-90deg) translate(12px) scale(1.05);
+	-webkit-transform: rotateX(-90deg) transloate(12px) scale(1.05);
 	/*height:350px;*/
 	/*width:400px;*/
 }
+.ddescription p:nth-child(1) {
+	background-color: transparent;
+	text-align:left;
+	margin-top:0px;
+	cursor: -webkit-zoom-in;
+	margin-left:44%;
+	width:0%;
+	transition: all 1s;
+	-webkit-transition: all 1s;
+}
+.ddescription p:nth-child(1):hover {
+        background-color: red;
+	margin-left:0%;
+	width:100%;
+}
+
 .ndescription {	
     height:280px;
     width:340px;
@@ -331,7 +347,55 @@ b{
 .idle{
     opacity:0.0;
 }
+textarea{
+	resize:none;
+}
+#fullscreen {
+    width:0%;
+    height:0%;
+    background-color:transparent;
+    position:fixed;
+    z-index:101;
+    margin-left:1%;
+    border-radius:20px;    
+    transition: all 0.5s;
+    -webkit-transition: all 0.5s;
+}
+#fullscreen.active{
+    position:fixed;
+    z-index:101;
+    margin:1% 1% auto auto;
+    width:95%;
+    height:95%;
+    background-color:rebeccapurple;
+}
 
+#fullscreen p:nth-child(1) {
+        background-color: transparent;
+        text-align:left;
+        margin-top:0px;
+        cursor: -webkit-zoom-in;
+        margin-left:44%;
+        width:0%;
+        transition: all 1s;
+        -webkit-transition: all 1s;
+}
+#fullscreen p:nth-child(1):hover {
+        background-color: red;
+        margin-left:0%;
+        width:100%;
+}
+
+#cli {
+    width:90%;
+    height:75%;
+    font-size:8px;
+}
+input[name="clistdin"]{
+    color:green;
+    background-color:black;
+    border-top:none
+}
 /* form for jobsubmit */
 
 .form-3 {

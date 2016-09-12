@@ -19,8 +19,9 @@ var msgfunction={'filelist':{elemid:'folder',onmessage:showlist},
 		'hpcout':{elemid:'cli',onmessage:tocli},
 		'jobstat':{elemid:'stat',onmessage:msglog}};
 
-var behaviour={'divgraph':{'onclick':'fullscreen','onmouseover':'delay(1,fullscreen)','onmouseleave':'cleardelay(fullscreen)'},
-		'diveditor':{'onclick':'fullscreen','onmouseover':'delay(1,fullscreen)','onmouseleave':'cleardelay(fullscreen)'}};
+var behaviour={'fullscreencloser':{'onclick':'closefs','onmouseover':'delay(1,closefs)','onmouseleave':'cleardelay(closefs)'},
+		'graphexpander':{'onclick':'openfs','onmouseover':'delay(1,openfs)','onmouseleave':'cleardelay(openfs)'},
+		'editorexpander':{'onclick':'openfseditor','onmouseover':'delay(1,openfseditor)','onmouseleave':'cleardelay(openfseditor)'}};
 
 
 var getquery={id:'',server:'http://localhost:9999',db:'',include_docs:'true',docid:'',since:'now'};
@@ -51,20 +52,52 @@ function tocli(id,msg){
 }
 
 function setevent(elem,msg){
-        var that=document.getElementById(elem);
-        var ev=Object.keys(msg);
-        ev.map(function(evnt){that[evnt]=eval(msg[evnt]);});
+	var that=document.getElementById(elem);
+	var ev=Object.keys(msg);
+	ev.map(function(evnt){that[evnt]=eval(msg[evnt]);});
 }
 
 function elemmap(vr){
         var elem=Object.keys(vr);
         elem.map(function(id){setevent(id,vr[id]);});
 }
-
-
-function fullscreen(elem){
-	console.log('fullscreen ',elem.target);
+function closefs(elem){
+	var fs=document.getElementById('fullscreen');
+	var head=document.getElementById('fshead');
+	head.innerText='';
+	fs.childNodes.forEach(function(node){if (node.id!='fullscreencloser') fs.removeChild(node);});
+	fs.classList.remove('active');
+}
+function openfs(elem){
+	var fs=document.getElementById('fullscreen');
+	var head=document.getElementById('fshead');
+	head.innerText=elem.target.innerText+' '+elem.target.filename;
+	fs.classList.add('active');
+}
+function openfseditor(elem){
+	var fs=document.getElementById('fullscreen');
+	var source=document.getElementById('diveditor');
+	fs.core=null;
+	fs.destination=null;
+	fs.childNodes.forEach(function(node){if (node.id!='fullscreencloser') fs.removeChild(node);});
 	
+	source.childNodes.forEach(function(node){if (node.id=='preeditor'){
+											fs.core=node.children[0];
+											fs.destination=node;}});
+	if (fs.core){
+		var textarea=document.createElement('textarea');
+		textarea.textContent=fs.core.filedata;
+		var savebutton=document.createElement('button');
+		savebutton.value='save';
+		textarea.style.width="100%";
+		textarea.style.height="90%";
+	
+		var head=document.getElementById('fshead');
+		head.innerText='Editor';
+		//fs.listen=new Proxy(editor,{set:function(t,k,v){if (k=='innerHTML') return fs[k]=v;}});
+		fs.appendChild(textarea);
+		fs.classList.add('active');
+	}
 }
 function cleardelay(func){
 	return function(i){TweenLite.killDelayedCallsTo(func);};
@@ -97,11 +130,22 @@ function showmime(id,datamsg){
 }
 function showfile(id,datamsg){
 	var el=document.getElementById(id);
-	var res=window.hljs.highlightAuto(datamsg['block']);
-	el.innerHTML=res.value;
-	el.filename=datamsg['name'];
+	var same=(datamsg['offset']!=0);
+	el.eof=false;
+	if (el.hasOwnProperty('blockoffset')&&same){
+		el.eof=datamsg['blocksize']==0;
+	}
+	if (!same){
+		el.filedata='';
+		el.filename=datamsg['name'];
+		el.blockoffset=0;
+		el.blocksize=datamsg['blocksize'];
+	}
+	if (!el.eof) el.filedata+=datamsg['block'];
 	el.blockoffset=datamsg['offset'];
-	el.blocksize=datamsg['blocksize'];
+	var res=window.hljs.highlightAuto(el.filedata);
+	el.innerHTML=res.value;
+	if (!el.eof) setTimeout(getblock(el.filename,el.blockoffset+el.blocksize),1000);	
 }
 function fileelement(filename,el,ischecked,islocal){
 	var inp=document.createElement('input');

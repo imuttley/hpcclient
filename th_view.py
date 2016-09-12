@@ -112,8 +112,9 @@ def fileselect(name,offset=0,size=4*1024):
 			return showtograph(name)
 		else:
 			if os.stat(filepath).st_size<offset:
-				block='End of file'
+				block=''
 				offset=os.stat(filepath).st_size
+				size=0
 			else:
 				with open(filepath,'r') as f:
 					f.seek(offset)
@@ -121,7 +122,7 @@ def fileselect(name,offset=0,size=4*1024):
 			#TODO return EOF if offset > size
 	except Exception as e:
 		block='{0}'.format(e)
-        sendmsg("fileselect",{"name":name,"offset":offset,"blocksize":size,"block":block},raw=True)
+        sendmsg("fileselect",{"name":name,"offset":offset,"blocksize":len(block),"block":block},raw=True)
 """write a block on selected file and offset"""
 def writeblock(name,offset=0,data=''):
 	with open('{0}/{1}'.format(DEFAULTFOLDER,name),'r+') as f:

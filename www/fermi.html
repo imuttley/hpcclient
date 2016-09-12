@@ -89,11 +89,7 @@ function two(e){
 }
 
 var deg={z:0};
-//window.onmessage=function(e){
-//        if (window.location.origin!=e.origin){
-//                console.log('message from external iframe',e);
-//        }
-//};
+var scenetween;
 window.onload=function(){
 	console.log('Dom ready');
 	//var xmlreq=new XmlRpcRequest('http://192.107.94.227:5984/commands/append/','runjob');
@@ -104,10 +100,10 @@ window.onload=function(){
 	var slides=document.querySelectorAll("div.panel");
 	// initial condition
 	two();
-	var tween= TweenMax.to("#wheel",.8,{rotation:180,yoyo:false,ease:Back.easeInOut,onComplete:one,onReverseComplete:two});
+	scenetween= TweenMax.to("#wheel",.8,{rotation:180,yoyo:false,ease:Back.easeInOut,onComplete:one,onReverseComplete:two});
 	var scene= new ScrollMagic.Scene({
 			})
-			.setTween(tween)
+			.setTween(scenetween)
 			.addIndicators({name:"context"})
 			.addTo(controller);
 	
@@ -149,8 +145,9 @@ window.onload=function(){
 <!-- wheel selector -->
 <div id="wheel" class="trigger">
 <div id="marconibox" onclick="showsubmit(this);" class="rightpos"><small>Launch a job</small></div>
-<div id="ngsbox" onclick="showsubmit(this);" class="leftpos" ><small>NGS</small></div>
+<div id="ngsbox" onclick="" class="leftpos" ><small>NGS</small></div>
 </div>
+<div id="fullscreen"><p id="fullscreencloser"><b id="fshead"></b></p> </div>
 <iframe style="width:98%;height:600px;" id="nsgframe" name="frame" ></iframe>
 <!-- description div -->
 <div  class="dpanel">
@@ -158,7 +155,7 @@ window.onload=function(){
 		
 	</div>
 	<div class="ddescription">
-		<small>Queue</small>
+		<p><small>Queue</small></p>
 		<div style="height:90%;width:100%;font-size:12px;" id="queue">Here a form to select a job id, and a method for get qstat information.
 			<div class="spinner">
   				<div class="bounce1"></div>
@@ -176,7 +173,7 @@ window.onload=function(){
 		Redirect to NSG portal for HPC computation
 	</div>
 	<div class="ddescription">
-		<small>Stats</small>
+		<p><small>Stats</small></p>
 		<textarea style="height:90%;width:100%;font-size:12px" id="stat">View stats for selected job.</textarea> 
 	</div>	
 </div>
@@ -186,7 +183,7 @@ window.onload=function(){
 		Redirect to NSG portal for HPC computation
 	</div>
 	<div id="divgraph" class="ddescription">
-		<small>Graph</small>
+		<p id="graphexpander"><small>Graph</small></p>
 		<div id="graph"></div>
 		<!--<embed id="graph" style="width:80%;height:90%"/>-->
 		
@@ -199,7 +196,7 @@ window.onload=function(){
 		Redirect to NSG portal for HPC computation
 	</div>
 	<div class="ddescription">
-		<small>Files</small>
+		<p><small>Files</small></p>
 		<div style="width:100%" id="folder">
 		 	<div class="spinner">
   				<div class="bounce1"></div>
@@ -214,8 +211,8 @@ window.onload=function(){
 		Redirect to NSG portal for HPC computation
 	</div>
 	<div id="diveditor" class="ddescription">
-		<small>Editor</small>
-		<pre><code class="text" id="editor"></code></pre>
+		<p  id="editorexpander"><small>Editor</small></p>
+		<pre id="preeditor"><code class="text" id="editor"></code></pre>
 	</div>
 </div>
 <div class="dpanel mid leftb" >
@@ -223,10 +220,11 @@ window.onload=function(){
 		Redirect to NSG portal for HPC computation
 	</div>
 	<div class="ddescription">
-		<small>CLI</small>
+		<p  id="cliexpander"><small>CLI</small></p>
 		<div id="cli">
 		a simple cli shell to tx stdin and rx stdout/err
 		</div>
+		<input type="text" id="stdin" size="55" name="clistdin">
 	</div>
 </div>
 
@@ -272,33 +270,6 @@ window.onload=function(){
 		<!-- labels -->
 		<input type="submit" onclick="jobsubmit(this)">
 	<!-- </form>  -->
-</div>
-<div  id="fermi" class="submit">
-	<!-- POST parameters and parse to xmlrpc with fixed variable for usercntx -->
-	<form method="post" action="commands/_design/schedule/_update/runjob/4f5ab08000cf9b9948dbf42c003415">
-		<!-- singleton -->
-		<input type="text" name="comment" >
-		<label for="comment">Comment</label>
-		<input type="text" name="job_name" pattern="[^ \t]">
-		<label for="job_name">Job_name</label>
-		<input type="number" size="5" name="bg_size" min="32" step="32" >
-		<label for="bg_size">bg_size</label>
-		<input type="number" size="5" name="ranks-per-node" min="1" > <!-- max bg_size*16 -->
-		<label for="ranks-per-node">ranks-per-node</label>
-		
-		<input type="text" name="exe" pattern="[^ \t]"> <!-- only powerpc64/special -->
-		<label for="exe">Executable</label>
-		
-		<!-- array -->
-		<input type="hidden" name="module"> <!-- is necessary ? -->
-		<input type="hidden" name="module">
-		
-		<!-- array -->
-		<input type="text" name="args" pattern="[^ \t]"><!-- mpi python etc.. -->
-		<label onclick="addarg(this);" for="args">args</label>
-		<!-- labels -->
-		
-	</form>
 </div>
 <form id="nsglogin" target="frame" method="post" name="loginBox" action="https://nsgdev.sdsc.edu:8443/portal2/login.action">
 		<input type="hidden" name="username" value="">
