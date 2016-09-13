@@ -125,9 +125,19 @@ def fileselect(name,offset=0,size=4*1024):
         sendmsg("fileselect",{"name":name,"offset":offset,"blocksize":len(block),"block":block},raw=True)
 """write a block on selected file and offset"""
 def writeblock(name,offset=0,data=''):
-	with open('{0}/{1}'.format(DEFAULTFOLDER,name),'r+') as f:
+	with open('{0}/{1}'.format(DEFAULTFOLDER,name),'w+') as f:
 		f.seek(offset)
 		f.write(data)
+"""save a new file"""
+def filesave(name,data):
+	if data and name:
+		try:
+			decode=base64.b64decode(data)
+			if DEBUG: print 'save file {0}'.format(name)
+			with open('{0}/{1}'.format(DEFAULTFOLDER,name),'w') as nf:
+				nf.write(decode)
+		except Exception as e:
+			if DEBUG: print 'file save exception {0}'.format(e)
 
 """unblocking file transfer. TODO: filter for filetype"""	
 def write2file(filename,chunck=''):
