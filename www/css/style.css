@@ -510,11 +510,11 @@ input[name="clistdin"]{
     outline: none; /* Remove Chrome outline */
 }
 
-.form-3 p:nth-child(3),
-.form-3 p:nth-child(4) {
-    float: left;
-    width: 50%;
-}
+/*.form-3 p:nth-child(3),*/
+/*.form-3 p:nth-child(4) {*/
+/*    float: left;*/
+/*   width: 50%;*/
+/*}*/
 
 .form-3 label[for=remember] {
     width: auto;
@@ -601,7 +601,9 @@ input[name="clistdin"]{
     border-radius: 50%;
     box-shadow: 0 0 6px 4px #fff;
 }
-
+.form-3.rj p:nth-child(1):before{
+    left:45px;
+}
 .form-3 p:nth-child(1):before{
     /* Size and position */
     content:"";
@@ -609,7 +611,7 @@ input[name="clistdin"]{
     height:100px;
     position:absolute;
     top:0;
-    left:45px;
+    left:-10px;
 
     /* Styles */
     -webkit-transform: rotate(75deg);

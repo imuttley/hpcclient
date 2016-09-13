@@ -74,6 +74,7 @@ function closefs(elem){
 		fs.mid=null;
 		fs.msg=null;
 	}
+	fs.style.overflow='';
 	fs.classList.remove('active');
 }
 function openfscli(elem){
@@ -82,21 +83,28 @@ function openfscli(elem){
 		return;
 	var source=document.getElementById('cli');
 	var output=document.createElement('div');
+	var input=document.createElement('input');
 	var head=document.getElementById('fshead');
 	head.innerText='Close';
+	fs.style.overflow='auto';
 	fs.appendChild(output);
 	output.innerHTML=source.innerHTML;
-	//fs.appendChild(input);
+	
+	input.type='text';
+	input.size='90';
+	
+	fs.appendChild(input);
+	
 	fs.classList.add('active');
 	var thisrcv;
 	fs.msg='hpcout';
 	fs.mid=msgfunction['hpcout'].onmessage;
 	msgfunction['hpcout'].onmessage=function(id,msg){
 													var str=Object.keys(msg);
-													str.map(function(io){fs.insertAdjacentHTML('beforeend',msg[io]+'<br>');});
-													mid(id,msg);
+													str.map(function(io){output.insertAdjacentHTML('beforeend',msg[io]+'<br>');});
+													fs.mid(id,msg);
 													};
-													
+		
 }
 function openfsgraph(elem){
 	var fs=document.getElementById('fullscreen');
