@@ -71,16 +71,30 @@ function closefs(elem){
 	}
 	if ((fs.mid) && (fs.msg)){
 		msgfunction[fs.msg]=fs.mid;
-		fs.mid=null;
-		fs.msg=null;
+		delete fs.mid;
+		delete fs.msg;
 	}
 	fs.style.overflow='';
 	fs.classList.remove('active');
+}
+function stdinsend(cmd){
+	var stdin=cmd.target.value;
+	cmd.target.value='';
+	sendmsg('hpcexecute',{'cmd':(btoa(stdin))});
+}
+function runscript(cmd){
+	var stdin='/bin/bash ';
+	stdin+=cmd.value;
+	document.getElementById('marconi').classList.remove('active');
+	cmd.value='';
+	sendmsg('hpcexecute',{'cmd':(btoa(stdin))});
 }
 function openfscli(elem){
 	var fs=document.getElementById('fullscreen');
 	if (fs.classList.contains('active')) 
 		return;
+	fs.msg='hpcout';
+	fs.mid=msgfunction['hpcout'].onmessage;
 	var source=document.getElementById('cli');
 	var output=document.createElement('div');
 	var input=document.createElement('input');
@@ -91,14 +105,14 @@ function openfscli(elem){
 	output.innerHTML=source.innerHTML;
 	
 	input.type='text';
-	input.size='90';
+	input.size='110';
 	
 	fs.appendChild(input);
 	
-	fs.classList.add('active');
-	var thisrcv;
-	fs.msg='hpcout';
-	fs.mid=msgfunction['hpcout'].onmessage;
+	input.onchange=stdinsend;
+    //input.onkeyup=stdinchange;
+	
+    fs.classList.add('active');
 	msgfunction['hpcout'].onmessage=function(id,msg){
 													var str=Object.keys(msg);
 													str.map(function(io){output.insertAdjacentHTML('beforeend',msg[io]+'<br>');});

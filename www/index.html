@@ -21,10 +21,24 @@ function sendmsg(req,obj){
 function verifypasswd(el){
 	var user=document.getElementById('user');
 	var passwd=document.getElementById('passwd');
-	if (mainwindow)
+	if (mainwindow){
 		sendmsg('verifypasswd',{user:user.value,passwd:passwd.value});
+		wait();
+		setTimeout(function(){signon();},5500);
+	}
 }
-
+function wait(){	
+	var but=document.getElementById('loginbutton');
+	but.style.display='none';
+	var spinner=document.getElementById('waitdiv');
+	spinner.style.display='block';
+}
+function signon(){
+	var but=document.getElementById('loginbutton');
+	but.style.display='block';
+	var spinner=document.getElementById('waitdiv');
+	spinner.style.display='none';
+}
 window.onmessage=function(e){
 	if (window.location.origin!=e.origin){
 		var response=e.data.content.response;
@@ -33,10 +47,7 @@ window.onmessage=function(e){
 		}else{
 			mainwindow=e.source;
 			console.log('message from external iframe:',e.data.content);
-			var but=document.getElementById('loginbutton');
-			but.style.display='block';
-			var spinner=document.getElementById('waitdiv');
-			spinner.style.display='none';
+			signon();
 		}
 	}
 };

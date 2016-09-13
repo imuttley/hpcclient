@@ -36,6 +36,7 @@ except:
 import xmlrpclib
 import os
 import threading
+import base64
 
 from th_dbevent import *
 from th_fsevent import *
@@ -106,6 +107,13 @@ def postfullstat(arg):
 			pass
 msgintf.update({'onfullstat':postfullstat})		
 
+def hpcrpccall(arg):
+	if (arg[0]=='hpcrpccall'):
+		try:
+			hpcrpc.execute(base64.b64decode(arg[1]))
+		except:
+			pass
+msgintf.update({'onuistdin':hpcrpccall})
 
 def changex(arg):
         if arg[0]=='folderchange':
@@ -147,7 +155,6 @@ if 'HPCAGENT' not in os.environ:
 	# input channel
 	if not 'hpcrpc' in globals(): 
 		hpcrpc=xmlrpclib.ServerProxy(COMMANDPOSTURL)
-
 	if not 'th_out' in globals():
 		th_out=th_dbeventlisten('marconistdout_thread',HPCSESSIONID,'stdout',hpcout)
 		th_out.daemon=True

@@ -362,27 +362,34 @@ textarea{
 	font-size:20px;
 }
 .delayedfunc {
-        background-color: transparent;
-        text-align:left;
-        margin-top:0px;
-        cursor: pointer;
-        margin-left:44%;
-        width:0%;
-        transition: all 1s;
-        -webkit-transition: all 1s;
+	background-color: transparent;
+	text-align:left;
+	margin-top:0px;
+	cursor: pointer;
+	margin-left:44%;
+	width:0%;
+	transition: all 1s;
+	-webkit-transition: all 1s;
 }
 .delayedfunc.two {
-        transition: all 2s;
-        -webkit-transition: all 2s;
+	transition: all 2s;
+	-webkit-transition: all 2s;
 }
 .delayedfunc.saved:hover {
-        background-color: green;
+	background:linear-gradient(0deg, rgba(0,255,0,0.1), rgba(0,255,0,1));
+	background: -moz-linear-gradient(0deg, rgba(0,255,0,0.1), rgba(0,255,0,1));
+	background: -ms-linear-gradient(0deg, rgba(0,255,0,0.1), rgba(0,255,0,1));
+	background: -o-linear-gradient(0deg, rgba(0,255,0,0.1), rgba(0,255,0,1));
+	background: -webkit-linear-gradient(0deg, rgba(0,255,0,0.1), rgba(0,255,0,1));
 }
-
 .delayedfunc:hover {
-        background-color: red;
-        margin-left:0%;
-        width:100%;
+	background: linear-gradient(0deg, rgba(255,0,0,0.1), rgba(255,0,0,1));
+	background: -moz-linear-gradient(0deg, rgba(255,0,0,0.1), rgba(255,0,0,1));
+	background: -ms-linear-gradient(0deg, rgba(255,0,0,0.1), rgba(255,0,0,1));
+	background: -o-linear-gradient(0deg, rgba(255,0,0,0.1), rgba(255,0,0,1));
+	background: -webkit-linear-gradient(0deg, rgba(255,0,0,0.1), rgba(255,0,0,1));
+	margin-left:0%;
+	width:100%;
 }
 b {
 	font-size:30px;

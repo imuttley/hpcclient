@@ -84,6 +84,15 @@ def sendmsg(sender,msg,raw=False):
         		msend=session.send(kernel.iopub_socket,session.msg("hpcclient",content={"response":sender,"data":"{0}".format(msg)}))
 		else:
 			msend=session.send(kernel.iopub_socket,session.msg("hpcclient",content={"response":sender,"data":msg}))
+
+def hpcexecute(cmd):
+	if cmd:
+		try:
+			[msgid for msgid in msgintf if msgintf[msgid](('hpcrpccall',cmd))]			
+		except:
+			pass
+
+
 """full stat request"""
 def fullstat(jobid=None):
 	#print 'fullstat request for {0}'.format(jobid)
