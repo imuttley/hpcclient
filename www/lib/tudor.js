@@ -83,7 +83,7 @@ function stdinsend(cmd){
 	sendmsg('hpcexecute',{'cmd':(btoa(stdin))});
 }
 function runscript(cmd){
-	var stdin='/bin/bash ';
+	var stdin='/bin/bash $WORK/middleware-tn/webfolder/';
 	stdin+=cmd.value;
 	document.getElementById('marconi').classList.remove('active');
 	cmd.value='';
