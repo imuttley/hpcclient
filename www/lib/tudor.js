@@ -251,19 +251,19 @@ function showfile(id,datamsg){
 }
 function fileelement(filename,el,ischecked,islocal){
 	var inp=document.createElement('input');
-        var spn=document.createElement('span');
-        var br=document.createElement('br');
-        inp.type='checkbox';
-        inp.name=filename;
-        inp.className='fileselection';
-        inp.onclick=filechecked;
-        inp.checked=ischecked;
-        if (islocal) el.appendChild(inp);
-        spn.id=filename;
-        spn.setAttribute('onclick','getblock(this.id,0)');
-        spn.textContent=filename;
-        el.appendChild(spn);
-        el.appendChild(br);
+	var spn=document.createElement('span');
+	var br=document.createElement('br');
+	inp.type='checkbox';
+	inp.name=filename;
+	inp.className='fileselection';
+	inp.onclick=filechecked;
+	inp.checked=ischecked;
+	if (islocal) el.appendChild(inp);
+	spn.id=filename;
+	spn.setAttribute('onclick','getblock(this.id,0)');
+	spn.textContent=filename;
+	el.appendChild(spn);
+	el.appendChild(br);
 }
 function showlist(id,listmsg){
 	var el=document.getElementById(id);
@@ -381,18 +381,18 @@ function queuelist(id,msg){
 function assignfilereader(file){
 	if (file.size<(1024*1024*20)){
 		var fr=new FileReader();
-                fr.filename=file.name;
-                fr.totalsize=file.size;
-                fr.lm=file.lastModified;
-                fr.onload=function(e){
+		fr.filename=file.name;
+		fr.totalsize=file.size;
+		fr.lm=file.lastModified;
+		fr.onload=function(e){
 			console.log('send file to main window:',this.filename);
 			var fd=e.target.result;
-                        var buffer=strtoab(fd);
-                        mainwindow.postMessage({method:'write2file',params:{name:this.filename,data:buffer}},'*',[buffer]);
-                };
+			var buffer=strtoab(fd);
+			mainwindow.postMessage({method:'write2file',params:{name:this.filename,data:buffer}},'*',[buffer]);
+			};
 		fr.onerror=function(e){
             		console.log('something wrong: ',e);
-            	};
+            		};
 		fr.readAsDataURL(file);
 	}
 }
