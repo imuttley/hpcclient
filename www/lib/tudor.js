@@ -22,6 +22,7 @@ var msgfunction={'filelist':{elemid:'folder',onmessage:showlist},
 var behaviour={'fullscreencloser':{'onclick':'closefs','onmouseover':'delay(1,closefs)','onmouseleave':'cleardelay(closefs)'},
 		'graphexpander':{'onclick':'openfsgraph','onmouseover':'delay(1,openfsgraph)','onmouseleave':'cleardelay(openfsgraph)'},
 		'editorexpander':{'onclick':'openfseditor','onmouseover':'delay(1,openfseditor)','onmouseleave':'cleardelay(openfseditor)'},
+		'statexpander':{'onclick':'openfsstat','onmouseover':'delay(1,openfsstat)','onmouseleave':'cleardelay(openfsstat)'},
 		'cliexpander':{'onclick':'openfscli','onmouseover':'delay(1,openfscli)','onmouseleave':'cleardelay(openfscli)'}};
 
 
@@ -140,6 +141,20 @@ function openfsgraph(elem){
 		fs.appendChild(obj);
 		fs.classList.add('active');
 	}
+}
+function openfsstat(elem){
+	var fs=document.getElementById('fullscreen');
+	if (fs.classList.contains('active')) 
+		return;
+	var source=document.getElementById('stat');
+	var textarea=document.createElement('textarea');
+	textarea.textContent=source.textContent;
+	textarea.style.width="100%";
+	textarea.style.height="90%";
+	fs.appendChild(textarea);
+	var head=document.getElementById('fshead');
+	head.innerText='Close';
+	fs.classList.add('active');
 }
 function openfseditor(elem){
 	var fs=document.getElementById('fullscreen');
