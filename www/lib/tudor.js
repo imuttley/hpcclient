@@ -7,22 +7,26 @@ var filetype={'other':0,'hoc':1,'mod':2,'py':3};
 var record={_id:'',_rev:'',stats:'',date:'',_attachments:''};
 var remotedb=remoteserver;//+dbfolder;
 var subm=new XMLHttpRequest(); 
+var _filefolder={};
+var filefolder=new Proxy(_filefolder,{set:function(e,k,v){e[k]=v;},get:function(e,k){return e[k];}});
 
 //link to python response messages
 var msgfunction={'filelist':{elemid:'folder',onmessage:showlist},
-		'qstat':{elemid:'queue',onmessage:msglog},
-		'fileselect':{elemid:'editor',onmessage:showfile},
-		'eventproxy':{elemid:'',onmessage:eventregistered},
-		'test':{elemid:'',onmessage:msglog},
-		'queuelist':{elemid:'queue',onmessage:queuelist},
-		'showmime':{elemid:'graph',onmessage:showmime},
-		'hpcout':{elemid:'cli',onmessage:tocli},
-		'jobstat':{elemid:'stat',onmessage:msglog}};
+					'qstat':{elemid:'queue',onmessage:msglog},
+					'fileselect':{elemid:'editor',onmessage:showfile},
+					'eventproxy':{elemid:'',onmessage:eventregistered},
+					'test':{elemid:'',onmessage:msglog},
+					'queuelist':{elemid:'queue',onmessage:queuelist},
+					'showmime':{elemid:'graph',onmessage:showmime},
+					'hpcout':{elemid:'cli',onmessage:tocli},
+					'filestats':{elemid:'filefolder',onmessage:assignstats},
+					'jobstat':{elemid:'stat',onmessage:msglog}};
 
 var behaviour={'fullscreencloser':{'onclick':'closefs','onmouseover':'delay(1,closefs)','onmouseleave':'cleardelay(closefs)'},
 		'graphexpander':{'onclick':'openfsgraph','onmouseover':'delay(1,openfsgraph)','onmouseleave':'cleardelay(openfsgraph)'},
 		'editorexpander':{'onclick':'openfseditor','onmouseover':'delay(1,openfseditor)','onmouseleave':'cleardelay(openfseditor)'},
 		'statexpander':{'onclick':'openfsstat','onmouseover':'delay(1,openfsstat)','onmouseleave':'cleardelay(openfsstat)'},
+		'fileexpander':{'onclick':'openfsfile','onmouseover':'delay(1,openfsfile)','onmouseleave':'cleardelay(openfsfile)'},
 		'cliexpander':{'onclick':'openfscli','onmouseover':'delay(1,openfscli)','onmouseleave':'cleardelay(openfscli)'}};
 
 
@@ -90,6 +94,31 @@ function runscript(cmd){
 	cmd.value='';
 	sendmsg('hpcexecute',{'cmd':(btoa(stdin))});
 }
+
+function populatediv(el,file,stat){
+	if (!(el.classList.contains('active')))
+		return;
+	var fdiv=document.createElement(div);
+	
+}
+
+function openfsfile(elem){
+	var fs=document.getElementById('fullscreen');
+	if (fs.classList.contains('active')) 
+		return;
+	
+	
+	filefolder=new Proxy(_filefolder,{get:function(t,k){
+											return t[k];},
+									set:function(t,k,v){
+											populatediv(fs,k,v);
+											t[k]=v;
+										}
+									}
+				);
+	
+}
+
 function openfscli(elem){
 	var fs=document.getElementById('fullscreen');
 	if (fs.classList.contains('active')) 
@@ -215,6 +244,14 @@ function filesync(filename){
 	fc.search=function(f){for (var i=0;i<this.length;i++){if(this[i].name==f)return this[i];}};
 	var el=fc.search(filename);
 }
+function assignstats(id,stat){
+	var key=Object.keys(stat);
+	eval(id)[stat.file]={};
+	key.map(function(k){eval(id)[stat.file][k]=stat[k];});
+	//eval(id)[stat.file]={stat};
+	//console.log('stat to',datamsg.file);
+}
+
 function showmime(id,datamsg){
 	var divembed=document.getElementById(id);
 	var embed=document.createElement('iframe');
@@ -287,7 +324,9 @@ function showlist(id,listmsg){
 	var local=eval(listmsg.local);
 	var ul=document.createElement('ul');
 	while (el.hasChildNodes()) el.removeChild(el.firstChild);
-	files.map(function(name){fileelement(name,el,checked.indexOf(name)!=-1,local.indexOf(name)!=-1);});
+	_filefolder={};
+	files.map(function(name){fileelement(name,el,checked.indexOf(name)!=-1,local.indexOf(name)!=-1);sendmsg('filestats',{'name':name});});
+	
 }
 function oldshowlist(id,listmsg){
 	var el=document.getElementById(id);

@@ -166,9 +166,17 @@ def write2file(filename,chunck=''):
 """create a list of files with shared attribute set/clear.TODO:filter fo filetype"""
 def filelist():
 	resp=os.listdir(DEFAULTFOLDER)
-        checked=[ k for k in resp if 'user.share' in xattr.listxattr('{0}/{1}'.format(DEFAULTFOLDER,k))]
-        checkable=[ local for local in resp if 'user.author' not in xattr.listxattr('{0}/{1}'.format(DEFAULTFOLDER,local))]
+	checked=[ k for k in resp if 'user.share' in xattr.listxattr('{0}/{1}'.format(DEFAULTFOLDER,k))]
+	checkable=[ local for local in resp if 'user.author' not in xattr.listxattr('{0}/{1}'.format(DEFAULTFOLDER,local))]
 	sendmsg("filelist",{"dir":resp,"checked":checked,"local":checkable},raw=True)
+
+""" get stats for file """
+def filestats(name):
+	if name:
+		filepath='{0}/{1}'.format(DEFAULTFOLDER,name)
+		res=os.stat(filepath)
+		filexattr=xattr.listxattr(filepath)
+		sendmsg("filestats",{"xattr":filexattr,"file":name,"size":res.st_size,"ctime":res.st_ctime},raw=True)
 
 """set/clear file shared attribute."""		
 def sharedlist(*list):
