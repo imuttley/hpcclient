@@ -185,11 +185,13 @@ function populatediv(el,file,statk,statv){
 		return;
 	var loc=el.getElementsByClassName('localdiv')[0];
 	var rem=el.getElementsByClassName('remotediv')[0];
-	loc.height='100%';
-	rem.height='100%';
 	var fl=[];
-	loc.childNodes.forEach(function(e){fl.push(e.id);});
-	rem.childNodes.forEach(function(e){fl.push(e.id);});
+	if ((loc) && (rem)){
+		loc.height='100%';
+		rem.height='100%';
+		loc.childNodes.forEach(function(e){fl.push(e.id);});
+		rem.childNodes.forEach(function(e){fl.push(e.id);});
+	}
 	if (fl.indexOf(file)>-1){
 		switch (statk){
 		case ('ctime'):
@@ -203,6 +205,7 @@ function populatediv(el,file,statk,statv){
 			fspan.textContent=Intl.DateTimeFormat('it-IT',toptions).format(new Date(statv*1000));
 			var fmenud=document.createElement('span');
 			fmenud.classList.add('menu');
+			fspan.classList.add('picol_trash');
 			fmenud.appendChild(menuitem('delete',function(){filedelete(file);}));
 			fspan.appendChild(fmenud);
 			
@@ -216,11 +219,13 @@ function populatediv(el,file,statk,statv){
 			if ((par==loc)&&(statv<(1024*1024*20))){
 				var fmenus=document.createElement('span');
 				fmenus.classList.add('menu');
-				if (fdiv.share=='')
+				if (fdiv.share==''){
+					fspan.classList.remove('picol_globe');
 					fmenus.appendChild(menuitem('share',function(){fileshare(file,'true');}));
-				else
+				}else{
+					fspan.classList.add('picol_globe');
 					fmenus.appendChild(menuitem('unshare',function(){fileshare(file,'');}));
-
+				}
 				fspan.appendChild(fmenus);
 			}
 			break;
@@ -290,7 +295,11 @@ function openfsfile(elem){
 	var localdiv=document.createElement('div');
 	var remotediv=document.createElement('div');
 	localdiv.classList.add('localdiv');
+	localdiv.classList.add('picol_computer');
+	
 	remotediv.classList.add('remotediv');
+	remotediv.classList.add('picol_cloud');
+	
 	fs.appendChild(localdiv);
 	fs.appendChild(remotediv);
 	localdiv.innerHTML='<div class="spinner"><div class="bounce1"></div><div class="bounce2"></div><div class="bounce3"></div></div>';
@@ -390,7 +399,7 @@ function openfseditor(elem){
 		savebutton.onmouseleave=function(e){TweenLite.killDelayedCallsTo(filesave);}
 		
 		fs.appendChild(savebutton);
-		savebutton.innerHTML='<small>Save</small>';
+		savebutton.innerHTML='<b class="picol_floppy_disk" >Save</b>';
 		
 		savebutton.classList.add('delayedfunc');
 		savebutton.classList.add('two');
@@ -702,7 +711,7 @@ function editorfunc(e){
 }
 function getdir(){
 	sendmsg('filelist',null);
-	setTimeout(getdir,13000);
+	setTimeout(getdir,7000);
 }
 function countdown(){
 	livetime-=10;
