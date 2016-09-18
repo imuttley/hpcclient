@@ -95,10 +95,172 @@ function runscript(cmd){
 	sendmsg('hpcexecute',{'cmd':(btoa(stdin))});
 }
 
-function populatediv(el,file,stat){
+/* <div class='icon'> filename
+ * 	<ul class='menu'>
+ * 		<li class='spread'><a class='unit' href='#'> share </a></li>
+ * 		<li class='spread'><a class='unit' href='#'> delete </a></li>
+ * 		<li class='spread'><a class='unit' href='#'> rename </a></li>
+ * 	</ul>
+ * </div>
+ */	
+function menuitem(text,onc){
+	var fspread=document.createElement('span');
+	fspread.classList.add('spread');
+	var fa=document.createElement('a');
+	fa.classList.add('unit');
+	fa.innerText=text;
+	fa.onclick=onc;
+	fspread.appendChild(fa);
+	return fspread;
+}
+function filerename(orig,dest){
+	console.log('rename ',orig);
+	//sendmsg('filerename',{src:orig,dst:dest});
+	removediv(orig);
+}
+function fileshare(orig,val){
+	sendmsg('filexattr',{'name':orig,'xattr':'user.share','value':val});
+	removediv(orig);
+}
+function filedelete(orig){
+	sendmsg('hpcexecute',{'cmd':(btoa('rm $WORK/middleware-tn/webfolder/'+orig))})
+	sendmsg('filedelete',{'name':orig});
+	removediv(orig);
+	
+}
+
+function fileitem(file){
+	var fdiv=document.createElement('div');
+	//fdiv.innerText=file;
+	//fdiv.classList.add('delayedfunc');
+	fdiv.id=file;
+	var fname=document.createElement('span');
+	fname.id='name'+file;
+	fname.innerText=file;
+	//fname.style.float='left';
+	//fname.style.position='fixed';
+	fname.style.margin='1em';
+	fname.classList.add('icon');
+	
+	var fsize=document.createElement('span');
+	fsize.id='size'+file;
+	//fsize.style.float='';
+	fsize.style.marginLeft='1em';
+	fsize.classList.add('icon');
+	var fdate=document.createElement('span');
+	fdate.id='date'+file;
+	fdate.style.marginLeft='1em';
+	//fdate.style.float='left';
+	fdate.classList.add('icon');
+	//fdate.classList.add('two');
+	
+	fdiv.appendChild(fdate);
+	fdiv.appendChild(fsize);
+	fdiv.appendChild(fname);
+	
+	var fmenur=document.createElement('span');
+	fmenur.classList.add('menu');
+	fmenur.appendChild(menuitem('rename',function(){filerename(file);}));
+	fname.appendChild(fmenur);
+	
+	// if file.stat.local
+	//fmenu.appendChild(menuitem('share',function(){console.log('share ',file);}));
+	//fmenu.appendChild(menuitem('rename',function(){console.log('rename ',file);}));
+	//fdiv.appendChild(fmenu);
+	
+	return fdiv;
+}
+function removediv(file){
+	var el=document.getElementById('fullscreen');
 	if (!(el.classList.contains('active')))
 		return;
-	var fdiv=document.createElement(div);
+	var loc=el.getElementsByClassName('localdiv')[0];
+	var rem=el.getElementsByClassName('remotediv')[0];
+	var fl=[];
+	loc.childNodes.forEach(function(e){if (e.id==file) loc.removeChild(e);});
+	rem.childNodes.forEach(function(e){if (e.id==file) rem.removeChild(e);});
+}
+function populatediv(el,file,statk,statv){
+	if (!(el.classList.contains('active')))
+		return;
+	var loc=el.getElementsByClassName('localdiv')[0];
+	var rem=el.getElementsByClassName('remotediv')[0];
+	loc.height='100%';
+	rem.height='100%';
+	var fl=[];
+	loc.childNodes.forEach(function(e){fl.push(e.id);});
+	rem.childNodes.forEach(function(e){fl.push(e.id);});
+	if (fl.indexOf(file)>-1){
+		switch (statk){
+		case ('ctime'):
+			var fspan=document.getElementById('date'+file);
+			//var d=new Date(statv*1000);
+			var toptions = {
+					  hour: 'numeric', minute: 'numeric', second: 'numeric',
+					  year: 'numeric', month: 'numeric', day: 'numeric',
+					  hour12: false
+					};
+			fspan.textContent=Intl.DateTimeFormat('it-IT',toptions).format(new Date(statv*1000));
+			var fmenud=document.createElement('span');
+			fmenud.classList.add('menu');
+			fmenud.appendChild(menuitem('delete',function(){filedelete(file);}));
+			fspan.appendChild(fmenud);
+			
+			break;
+		case ('size'):
+			var fspan=document.getElementById('size'+file);
+			var i = Math.floor( Math.log(statv) / Math.log(1024) );
+			fspan.textContent=''+( statv / Math.pow(1024, i) ).toFixed(2) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+			var fdiv=document.getElementById(file);
+			var par=fdiv.parentElement;
+			if ((par==loc)&&(statv<(1024*1024*20))){
+				var fmenus=document.createElement('span');
+				fmenus.classList.add('menu');
+				if (fdiv.share=='')
+					fmenus.appendChild(menuitem('share',function(){fileshare(file,'true');}));
+				else
+					fmenus.appendChild(menuitem('unshare',function(){fileshare(file,'');}));
+
+				fspan.appendChild(fmenus);
+			}
+			break;
+		case('xattr'):
+			var fdiv=document.getElementById(file);
+			var par=fdiv.parentElement;
+			fdiv.classList.remove('transparent');
+			var w=loc.getElementsByClassName('spinner');
+			if (w.length>0)
+				loc.removeChild(w[0]);
+			w=rem.getElementsByClassName('spinner');
+			if (w.length>0)
+				rem.removeChild(w[0]);
+			
+			if ('user.author' in statv){
+				if(par!=rem){
+					par.removeChild(fdiv);
+					rem.appendChild(fdiv);
+				}
+			} else{
+				if (par!=loc){
+					par.removeChild(fdiv);
+					loc.appendChild(fdiv);		
+				}
+				fdiv.share='';
+				if ('user.share' in statv){
+					fdiv.share=statv['user.share'];
+				}
+			}
+			
+		default:
+			break;
+		}
+				
+		// update values
+		return;
+	}
+	var fdiv=fileitem(file);
+	fdiv.classList.add('transparent');
+	loc.appendChild(fdiv);
 	
 }
 
@@ -106,17 +268,37 @@ function openfsfile(elem){
 	var fs=document.getElementById('fullscreen');
 	if (fs.classList.contains('active')) 
 		return;
-	
-	
 	filefolder=new Proxy(_filefolder,{get:function(t,k){
-											return t[k];},
-									set:function(t,k,v){
-											populatediv(fs,k,v);
-											t[k]=v;
+										return t[k];},
+									set:function(t,filename,v){
+										//populatediv(fs,k,t[k]);
+										t[filename]=new Proxy({},{
+											get:function(st,sk){return st[sk];},
+											set:function(st,sk,sv){
+												if (st[sk]!=sv)
+													populatediv(fs,filename,sk,sv);
+												st[sk]=sv;
+											}
+										});	
 										}
 									}
 				);
 	
+	fs.style.overflow='auto';
+	var head=document.getElementById('fshead');
+	head.innerText='Close';
+	var localdiv=document.createElement('div');
+	var remotediv=document.createElement('div');
+	localdiv.classList.add('localdiv');
+	remotediv.classList.add('remotediv');
+	fs.appendChild(localdiv);
+	fs.appendChild(remotediv);
+	localdiv.innerHTML='<div class="spinner"><div class="bounce1"></div><div class="bounce2"></div><div class="bounce3"></div></div>';
+	remotediv.innerHTML='<div class="spinner"><div class="bounce1"></div><div class="bounce2"></div><div class="bounce3"></div></div>';
+	
+	
+	
+	fs.classList.add('active');
 }
 
 function openfscli(elem){
@@ -305,6 +487,9 @@ function fileelement(filename,el,ischecked,islocal){
 	var inp=document.createElement('input');
 	var spn=document.createElement('span');
 	var br=document.createElement('br');
+	//filefolder[filename]={};
+	/*filefolder[filename].local=islocal;
+	filefolder[filename].shared=ischecked;*/
 	inp.type='checkbox';
 	inp.name=filename;
 	inp.className='fileselection';

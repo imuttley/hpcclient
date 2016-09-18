@@ -178,6 +178,39 @@ def filestats(name):
 		filexattr=xattr.listxattr(filepath)
 		sendmsg("filestats",{"xattr":filexattr,"file":name,"size":res.st_size,"ctime":res.st_ctime},raw=True)
 
+""" remove a local file """
+def filerename(src,dst):
+	if src and dst:
+		srcpath='{0}/{1}'.format(DEFAULTFOLDER,src)
+		dstpath='{0}/{1}'.format(DEFAULTFOLDER,dst)
+		try:
+			os.rename(srcpath,dstpath)
+		except:
+			pass
+		finally:
+			filelist()
+
+""" remove a local file """
+def filedelete(name):
+	if name:
+		filepath='{0}/{1}'.format(DEFAULTFOLDER,name)
+		try:
+			os.remove(filepath)
+		except:
+			pass
+		finally:
+			filelist()
+
+""" set an xattr for a file """
+def filexattr(name,kx,value):
+	if name and kx:
+		filepath='{0}/{1}'.format(DEFAULTFOLDER,name)
+		if value=='':
+			xattr.removexattr(filepath,kx)
+		else:
+			xattr.setxattr(filepath,kx,value)
+		filelist()
+		
 """set/clear file shared attribute."""		
 def sharedlist(*list):
 	sharefiles=[ f for f in list ]

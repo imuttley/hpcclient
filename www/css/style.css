@@ -366,10 +366,10 @@ textarea{
 }
 .delayedfunc {
 	background-color: transparent;
-	text-align:left;
+	/*text-align:left;*/
 	margin-top:0px;
 	cursor: pointer;
-	margin-left:44%;
+	/*margin-left:44%;*/
 	width:0%;
 	transition: all 1s;
 	-webkit-transition: all 1s;
@@ -690,4 +690,157 @@ input[name="clistdin"]{
     -webkit-transform: scale(1.0);
     transform: scale(1.0);
   }
+}
+
+/* file hidden menu */
+.icon {
+  position: relative;
+  /*background: white;
+  cursor: pointer;
+  margin: auto;
+  color: deepskyblue;
+  border-radius: 50%;
+  height: 150px;
+  width: 150px;
+  line-height: 150px;
+  text-align: center;
+  font-size: 2.75em;
+  font-weight: bold;*/
+  transition: 0.5s 1s;
+  
+}
+.remotediv{
+	float:right;
+	width:48%;
+	border-style: double;
+	transition: all 2s;
+}
+.localdiv{
+	float:left;
+	width:48%;
+	border-style: double;
+	transition: all 2s;
+}
+.icon:hover {
+  background: rgba(255, 0, 0, 0.75);
+  text-decoration: none;
+}
+
+.menu {
+  position: absolute;
+ /* top: -75px;
+  left: -75px;
+  border: 150px solid transparent;
+  cursor: default;
+  border-radius: 50%;*/
+  transform: scale(0);
+  transition: transform 1.0s 0.07s;
+  z-index: -5;
+}
+
+.spread {
+  position: absolute;
+  top: -1em;
+  list-style: none;
+  transition: all 0.5s 0.1s;
+}
+
+.icon:hover {
+  /* Where all the MAGIC happens: */
+}
+.icon:hover .menu {
+  transition: transform 0.4s 1s, z-index   0s  0.5s;
+  transform: scale(1);
+  z-index: 5;
+}
+.icon:hover .spread, .icon:hover .unit {
+  transition: all 0.6s;
+}
+.icon:hover .spread:nth-child(1) {
+  /*transition-delay: 3s;
+  transform: rotate(85deg);*/
+}
+.icon:hover .spread:nth-child(1) .unit {
+  /*transition-delay: 0.04s;
+  transform: rotate(635deg);*/
+}
+.icon:hover .spread:nth-child(2) {
+  transition-delay: 1s;
+  transform: rotate(125deg);
+}
+.icon:hover .spread:nth-child(2) .unit {
+  transition-delay: 0.08s;
+  transform: rotate(595deg);
+}
+.icon:hover .spread:nth-child(3) {
+  transition-delay: 1s;
+  transform: rotate(165deg);
+}
+.icon:hover .spread:nth-child(3) .unit {
+  transition-delay: 0.12s;
+  transform: rotate(555deg);
+}
+.icon:hover .spread:nth-child(4) {
+  transition-delay: 1s;
+  transform: rotate(205deg);
+}
+.icon:hover .spread:nth-child(4) .unit {
+  transition-delay: 0.16s;
+  transform: rotate(515deg);
+}
+.icon:hover .spread:nth-child(5) {
+  transition-delay: 1s;
+  transform: rotate(245deg);
+}
+.icon:hover .spread:nth-child(5) .unit {
+  transition-delay: 0.2s;
+  transform: rotate(475deg);
+}
+.icon:hover .spread:nth-child(6) {
+  transition-delay: 1s;
+  transform: rotate(285deg);
+}
+.icon:hover .spread:nth-child(6) .unit {
+  transition-delay: 0.24s;
+  transform: rotate(435deg);
+}
+.icon:hover .spread:nth-child(7) {
+  transition-delay: 1s;
+  transform: rotate(325deg);
+}
+.icon:hover .spread:nth-child(7) .unit {
+  transition-delay: 0.28s;
+  transform: rotate(395deg);
+}
+.icon:hover .spread:nth-child(8) {
+  transition-delay: 1s;
+  transform: rotate(365deg);
+}
+.icon:hover .spread:nth-child(8) .unit {
+  transition-delay: 0.32s;
+  transform: rotate(355deg);
+}
+.icon:hover .spread:nth-child(9) {
+  transition-delay: 1s;
+  transform: rotate(405deg);
+}
+.icon:hover .spread:nth-child(9) .unit {
+  transition-delay: 0.36s;
+  transform: rotate(315deg);
+}
+
+/* END .icon:hover */
+.unit {
+  position: absolute;
+  background: red;
+  font-size: 70%;
+  text-decoration: none;
+  text-align:center;
+  width: 45px;
+  height: 45px;
+  line-height: 45px;
+  /*color: dodgerblue;*/
+  border-radius: 20%;
+  
+  transition: 0.6s;
 }
