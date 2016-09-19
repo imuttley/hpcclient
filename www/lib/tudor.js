@@ -505,8 +505,8 @@ function fileelement(filename,el,ischecked,islocal){
 	inp.onclick=filechecked;
 	inp.checked=ischecked;
 	if (islocal) el.appendChild(inp);
-	spn.id=filename;
-	spn.setAttribute('onclick','getblock(this.id,0)');
+	//spn.id=filename;
+	spn.setAttribute('onclick','getblock("'+filename+'",0)');
 	spn.textContent=filename;
 	el.appendChild(spn);
 	el.appendChild(br);
