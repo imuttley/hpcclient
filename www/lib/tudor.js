@@ -161,7 +161,8 @@ function fileitem(file){
 	var fmenur=document.createElement('span');
 	fmenur.classList.add('menu');
 	fmenur.appendChild(menuitem('rename',function(){filerename(file);}));
-	fname.appendChild(fmenur);
+	// TODO
+	//fname.appendChild(fmenur);
 	
 	// if file.stat.local
 	//fmenu.appendChild(menuitem('share',function(){console.log('share ',file);}));
