@@ -46,7 +46,7 @@ Full stack system for [Jupyter](http://jupyter.org/) that bring the power of com
 
 ### HPC login node installation:
 
-*environment Neuron 7.5 actually under development on [Cineca](http://hpc.cineca.it)*
+*environment [Neuron 7.5](http://www.neuron.yale.edu/neuron/) actually under development on [Cineca](http://hpc.cineca.it)*
 *TODO*
 
 ### Client installation:
