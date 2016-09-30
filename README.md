@@ -70,7 +70,7 @@ marconiview
 ![iframe window](iframe.jpg)
 or webgui on popup window:
 ```python
-marconiview['window']=1
+marconiview.params['window']=1
 marconiview
 ```
 ![popup window](popup.jpg)
