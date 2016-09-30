@@ -51,13 +51,13 @@ run webgui for access to remote HPC node on iframe:
 ```python
 marconiview
 ```
-![iframe window]('./iframe.jpg')
+![iframe window]('iframe.jpg')
 or webgui on popup window:
 ```python
 marconiview['window']=1
 marconiview
 ```
-![popup window]('./popup.jpg')
+![popup window]('popup.jpg')
 
 *alternative you cand commit command on remote node typing on cell*
 ```python
