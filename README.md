@@ -32,6 +32,16 @@
 - subprocess
 - sys
 
+
+#What is
+
+Full stack system for [Jupyter](http://jupyter.org/) that bring the power of computational node from deep HPC hardware to user frontend and extended through responsive graphical interface: all across ssh-tunnel connection.
+Commands, files and datastreams (stdin, stdout, stderr) are stored and can be shared in near real-time. (multiple users todo)
+Filter function can be implemented for execution of customized script for pre-post elaboration, for files, commands and streams.
+Responsive user interface is embedded in module and is executed by front-end.
+ 
+
+
 ### HPC login node installation:
 
 *TODO*
@@ -62,7 +72,7 @@ marconiview
 ```
 ![popup window](popup.jpg)
 
-*alternative you cand commit command on remote node typing on cell*
+*alternative you can commit command on remote node typing on cell*
 ```python
 hpcrpc.execute('command')
 ```
@@ -89,6 +99,7 @@ hpcrpc.ls('-la')
 
 ### TODO
 
+* concurrent multiple users
 * VR enhancement
 * Data stream I/O for HPC computational node
 * 3D data representation
