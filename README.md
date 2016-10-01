@@ -51,14 +51,14 @@ Full stack system for [Jupyter](http://jupyter.org/) that bring the power of com
 
 ### Client installation:
 
-* download and extract on user folder or PYTHONPATH module folder 
+* download and extract on user folder 'hpcclient' or PYTHONPATH module folder 
 * create 'webfolder' for share file between HPC node.
 
 ### example code
 
 load module with:
 ```python
-from hpcclient-master import *
+from hpcclient import *
 ```
 run webgui for access to remote HPC node on iframe:
 ```python
