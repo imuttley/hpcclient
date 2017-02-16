@@ -8,6 +8,7 @@ var record={_id:'',_rev:'',stats:'',date:'',_attachments:''};
 var remotedb=remoteserver;//+dbfolder;
 var subm=new XMLHttpRequest(); 
 var _filefolder={};
+var cli,clikeydown,clikeypress;
 var filefolder=new Proxy(_filefolder,{set:function(e,k,v){e[k]=v;},get:function(e,k){return e[k];}});
 
 //link to python response messages
@@ -52,9 +53,10 @@ var credential={
 };
 
 function tocli(id,msg){
-	var cli=document.getElementById(id);
+	//var cli=document.getElementById(id);
 	var stream=Object.keys(msg);
-	stream.map(function(str){cli.insertAdjacentHTML('beforeend', msg[str]+'<br>');});
+	//stream.map(function(str){cli.insertAdjacentHTML('beforeend', msg[str]+'<br>');});
+	stream.map(function(str){cli.write(  msg[str] );});
 }
 
 function setevent(elem,msg){
@@ -71,6 +73,19 @@ function closefs(elem){
 	var fs=document.getElementById('fullscreen');
 	var head=document.getElementById('fshead');
 	head.innerText='';
+	var fscliterm=document.getElementById('fscliterm');
+	if (fscliterm){
+		var clidiv=document.getElementById('cli');
+		var tmp=fscliterm.childNodes[0];
+		fscliterm.innerHTML='';
+		clidiv.innerHTML='';
+		clidiv.appendChild(tmp);
+		cli.viewport.refresh({height:10});
+		cli.resize(60,24);
+		//document.removeEventListener("keydown", clikeydown, true);
+	    //document.removeEventListener("keypress", clikeypress, true);
+	    
+	}
 	while (fs.childNodes.length>1){
 		fs.childNodes.forEach(function(node){if (node.id!='fullscreencloser') fs.removeChild(node);});
 	}
@@ -310,36 +325,62 @@ function openfsfile(elem){
 	
 	fs.classList.add('active');
 }
-
+function kdh(e){
+	var char=e.keyCode;
+	if (char==13){
+		var line=cli.lines[cli.y];
+		var cmd=(line.map(function(e,i){if (i<cli.x) return e[1];})).join("");
+		//TODO
+		sendmsg('hpcexecute',{'cmd':(btoa(cli.line))});
+		cli.line='';
+	}
+	//TODO
+	//cli.write(String.fromCharCode(char));
+}
+function cliline(char){
+	cli.line+=char;
+	cli.write(char);
+}
 function openfscli(elem){
 	var fs=document.getElementById('fullscreen');
 	if (fs.classList.contains('active')) 
 		return;
-	fs.msg='hpcout';
-	fs.mid=msgfunction['hpcout'].onmessage;
+	//fs.msg='hpcout';
+	//fs.mid=msgfunction['hpcout'].onmessage;
 	var source=document.getElementById('cli');
 	var output=document.createElement('div');
+	output.classList.add('term');
+	output.id='fscliterm';
 	var input=document.createElement('input');
 	var head=document.getElementById('fshead');
 	head.innerText='Close';
 	fs.style.overflow='auto';
 	fs.appendChild(output);
-	output.innerHTML=source.innerHTML;
-	
+	var tmp=source.childNodes[source.childNodes.length-1];
+	source.innerHTML='<div class="spinner"><div class="bounce1"></div><div class="bounce2"></div><div class="bounce3"></div></div>';
+	output.appendChild(tmp);
+	cli.viewport.refresh({height:12});
+	cli.resize(122,44);
 	input.type='text';
 	input.size='110';
 	
-	fs.appendChild(input);
+	//fs.appendChild(input);
 	
-	input.onchange=stdinsend;
+	//input.onkeydown=cli.keyDownHandler.bind(cli);
+	//input.onkeypress=cli.keyPressHandler.bind(cli);
+	
+	//document.addEventListener("keydown", clikeydown, true);
+    //document.addEventListener("keypress", clikeypress, true);
+	
+	//input.onchange=stdinsend;
     //input.onkeyup=stdinchange;
 	
     fs.classList.add('active');
-	msgfunction['hpcout'].onmessage=function(id,msg){
+	/*msgfunction['hpcout'].onmessage=function(id,msg){
 													var str=Object.keys(msg);
 													str.map(function(io){output.insertAdjacentHTML('beforeend',msg[io]+'<br>');});
 													fs.mid(id,msg);
-													};
+													};*/
 		
 }
 function openfsgraph(elem){
@@ -740,28 +781,53 @@ function tudorevents(){
 	countdown();
 
 	elemmap(behaviour);	
+
+	cli=new Terminal({cursorBlink:true,debug:true,geometry:[60,24]});
+	cli.open(document.getElementById('cli'));
+	cli.viewport.refresh({height:10});
+	cli.line='';
+	cli.on('data',cliline);
+	cli.customKeydownHandler=kdh;
+	//cli.resize(60,24);
+	
+	/*cli=new Term( 80, 30, function(ch){ 
+								if (ch=='\t'){
+									return;
+								}
+								if (ch=='\r'){
+									var lin=document.getElementById('tline'+cli.y);
+									var cmd=lin.innerText.substr(0,cli.x);
+									cli.history.push(cmd);
+									console.log('command: ',cmd);
+									cli.writeln("");
+								} 
+								cli.write(ch);
+								}, 'cli', 'hellocli' );
+	clikeydown=cli.keyDownHandler.bind(cli);
+	clikeypress=cli.keyPressHandler.bind(cli);
+	cli.open();*/
 	
 	//window.localdb=new PouchDB(dbfolder);	
 	window.onmessage=function(e){
 	        if (window.location.origin!=e.origin){
-			var response=e.data.content.response;
-			if (msgfunction.hasOwnProperty(response)){
-				(msgfunction[response].onmessage)(msgfunction[response].elemid,e.data.content.data);	
-                	}else{
-				mainwindow=e.source;
-				console.log('message from external iframe:',e.data.content);
+	        	var response=e.data.content.response;
+	        	if (msgfunction.hasOwnProperty(response)){
+	        		(msgfunction[response].onmessage)(msgfunction[response].elemid,e.data.content.data);	
+                }else{
+                	mainwindow=e.source;
+                	console.log('message from external iframe:',e.data.content);
 				//if (response){
 				//	var bug=e.data.content.data.replace(/\'/g,'\"');
 				//	var jsonobj=JSON.parse(bug.replace('True','true').replace('False','false'));
 				//			
 				//}
-				switch(e.data.content.data){
-					case 'heartbeat':
-						livetime+=10;
-						break;
-					default:
-						break;
-				}
+                	switch(e.data.content.data){
+						case 'heartbeat':
+							livetime+=10;
+							break;
+						default:
+							break;
+                	}
 				//sendmsg('targetwindow',{});
         		}
 		}

@@ -5,6 +5,14 @@
 <link rel="stylesheet" href="css/font.css">
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/hldefault.css">
+<link rel="stylesheet" href="css/xterm.css">
+
+<!-- 
+<link rel="stylesheet" href="css/jquery.terminal.min.css">
+<script src="lib/myterminal.js"></script>  -->
+
+<script src="lib/xterm.js"></script>
+<script src="lib/fit.js"></script>
 
 <!--<script src="lib/mimic.js"></script>-->
 <script src="lib/TweenMax.min.js"></script>
@@ -17,6 +25,7 @@
 <script src="lib/plugins/animation.gsap.js"></script>
 <script src="lib/plugins/debug.addIndicators.js"></script>
 <!--<script src="lib/highlight.pack.js"></script>-->
+
 
 <script>
 
@@ -133,13 +142,14 @@ window.onload=function(){
 		//	iframe.src="https://nsgdev.sdsc.edu:8443/portal2/home.action";	
 		//load.innerText="Ok";
 	}
-	tudorevents();	
+	tudorevents();
+	// show cineca for initial context
+	window.scrollTo(1000,0);
 };
 
 </script>
-<style type="text/css">
 
-</style>
+
 <title>Marconi node gui</title>
 </head>
 <body>

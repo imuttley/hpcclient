@@ -26,12 +26,14 @@ from sshtunnel import SSHTunnelForwarder as tunnel
 try:
 	import paramiko
 except:
+	print 'module paramiko not found, try to install'
 	pip.main(['install','--user','paramiko'])
 import paramiko
 try:
 	import xmlrpclib
 except:
-	 pip.main(['install','--user','xmlrpclib'])
+	print 'module xmlrpclib not found, try to install'
+	pip.main(['install','--user','xmlrpclib'])
 
 import xmlrpclib
 import os
@@ -51,13 +53,15 @@ def runservices(user,passwd):
 	serv.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 	serv.connect(LOGINNODE,username=user,password=passwd)
 	stdin,stdout,stderr=serv.exec_command('cd $WORK/middleware-tn/ && ./runservice.sh')
-	response=[l.replace('\n','') for l in stdout.readlines()]
-	error=[l.replace('\n','') for l in stderr.readlines()]
+	#response=[l.replace('\n','') for l in stdout.readlines()]
+	response=stdout.readline().replace('\n','')
+	#error=stderr.readline().replace('\n','')
+	#error=[l.replace('\n','') for l in stderr.readlines()]
 	serv.close()
-	hn=response[0]
-	if hn and len(error)==0:
+	#hn=response[0]
+	if response:
 		#print 'services are running'
-		return hn
+		return response
 	return None
 
 	

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import fcntl,termios,subprocess,requests,time,threading,io,os,sys,pty
+import subprocess,requests,time,threading,os,sys
 from multiprocessing import Process
 
 
@@ -26,16 +26,9 @@ AGENTSERVER=config.POSTSERVER
 
 SHELL=os.environ['SHELL']
 #SHELL='/bin/bash'
-class shell:
-    import io
-    stdin=None
-    stdout=None
-    stderr=None
-    def __init__(self,fd):
-	self.stdin=self.io.open(fd,'w')
-	# non buffered read
-	self.stdout=self.io.open(fd,'rb',0)
-        #self.stderr=self.io.open(fd,'rb',0)
+SHELLSCRIPT='./bashpty'
+STDOUT='cat'
+FIFO='.agentfifo'
 
 class th_popandexec(threading.Thread):
     import io,os,requests,time
@@ -44,7 +37,7 @@ class th_popandexec(threading.Thread):
  
     def getagentvars(self,res,*arg,**kwargs):
 	couchinfo(res)
-    def __init__(self,id,sessionid,masterfd):
+    def __init__(self,id,sessionid):
         super(th_popandexec,self).__init__()
         self.qid=id
 	self.sessionid=sessionid
@@ -52,22 +45,16 @@ class th_popandexec(threading.Thread):
 	#	self.requests.get("http://127.0.0.1:5984/agents/{0}".format(self.name),hooks=dict(response=self.agentvars))
         self.updaterev=0
         #TODO get shell from db
-	#self.rout, self.wout=self.os.pipe()
-	#self.rerr, self.werr=self.os.pipe()
-	
-	self.shell=shell(masterfd)
-	
-	#self.shell.stdout=self.io.open(masterfd,'rb',0)
-	#self.shell.stderr=self.io.open(masterfd,'rb',0)
-
-	#self.rfderr,self.wfderr=self.io.open(self.rerr,'rb',0),os.fdopen(self.werr,'wb',0)
-	#self.shell.stdin=self.io.open(masterfd,'w')
-	#self.shell=self.subprocess.Popen([SHELL],stdin=self.subprocess.PIPE,stdout=self.wfdout,stderr=self.wfderr,shell=True)
+	self.rout, self.wout=self.os.pipe()
+	self.rerr, self.werr=self.os.pipe()
+	self.rfdout,self.wfdout=self.io.open(self.rout,'rb',0),os.fdopen(self.wout,'wb',0)
+	self.rfderr,self.wfderr=self.io.open(self.rerr,'rb',0),os.fdopen(self.werr,'wb',0)
+	self.shell=self.subprocess.Popen([SHELL],stdin=self.subprocess.PIPE,stdout=self.wfdout,stderr=self.wfderr,shell=True)
 
  	#self.stdout=self.subprocess.Popen([STDOUT,FIFO],stdin=None,stdout=self.	
 
-	self.outtopost=th_pipe2post(AGENTSERVER,self.shell.stdout,sessionid,'stdout',bufsize=4000)
-	#self.errtopost=th_pipe2post(AGENTSERVER,self.shell.stderr,sessionid,'stderr',bufsize=4000)	
+	self.outtopost=th_pipe2post(AGENTSERVER,self.rfdout,sessionid,'stdout',bufsize=4000)
+	self.errtopost=th_pipe2post(AGENTSERVER,self.rfderr,sessionid,'stderr',bufsize=4000)	
 
 
     def printexception(self,msg,e):
@@ -75,7 +62,7 @@ class th_popandexec(threading.Thread):
 
     def run(self):
         self.outtopost.start()
-        #self.errtopost.start()
+        self.errtopost.start()
         self.fetch()
         self.killme()
         #self.execute()
@@ -94,7 +81,7 @@ class th_popandexec(threading.Thread):
         for p in self.param: linein+='{0} '.format(p)
         try: 
             #maybe shell in crashed
-            self.shell.stdin.writelines(unicode(linein+'\n'))
+            self.shell.stdin.writelines(linein+'\n')
         except Exception as e:
             self.printexception("do",e)
             self.killme()
@@ -227,23 +214,15 @@ class th_popandexec(threading.Thread):
 
 
 def createthread(sessionid):
-    ch,masterfd=pty.fork()
-    if ch==0:
-	couchinfo("create shell process")
-        os.execl(SHELL,'Morg@{0}'.format(sessionid))
-    elif ch==-1:
-	couchinfo("Error on fork shell child!")
-    else:
-	couchinfo("create thread for id {0}".format(sessionid))
-	winsz=fctnl.ioctl(masterfd,termios.TIOCGWINSZ,'00000000')
-	th=th_popandexec(0,sessionid,masterfd)
-    	th.start()
-    	th.join()
+    couchinfo("create thread for id {0}".format(sessionid))
+    th=th_popandexec(0,sessionid)
+    th.start()
+    th.join()
+
 	
 def createprocess(resp,*arg,**kwarg):
     json=eval(resp.content)
     couchinfo(json)    
-    res=0
     for key in json.get('sessions'):
         if not key in proc:
                 proc[key]=Process(target=createthread,args=(key,))
@@ -253,8 +232,10 @@ def createprocess(resp,*arg,**kwarg):
                         couchinfo("process {0} is alive".format(key))
                 else:
                         couchinfo("process {0} is dead".format(key))
-	res+=proc[key].is_alive()
-    
+
+    res=0
+    for key in json.get('sessions'):
+        res+=proc[key].is_alive()
     if(res==0):
         couchinfo('no active sessions: suicide!')
         os.system("kill -9 {0}".format(os.getpid()))

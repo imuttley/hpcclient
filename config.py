@@ -2,7 +2,8 @@ from Queue import Queue
 import threading,os
 
 if 'HPCAGENT' in os.environ:
-	POSTSERVER="http://127.0.0.1:5984"
+	POSTSERVER="http://{0}:5984".format(os.environ['POSTSERVER'])
+	#POSTSERVER="http://127.0.0.1:5984"
 	kernel=None
 	ME=os.environ['HPCAGENT']
 else:
